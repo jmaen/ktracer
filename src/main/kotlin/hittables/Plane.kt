@@ -1,6 +1,6 @@
 package hittables
 
-import image.Color
+import models.Color
 import kotlin.math.abs
 import models.*
 

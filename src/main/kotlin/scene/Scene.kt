@@ -1,12 +1,13 @@
 package scene
 
 import kotlin.math.round
+import kotlin.math.max
 import hittables.Hittable
-import image.Color
+import models.Color
 import models.*
 
 class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<Light>, val backgroundColor: Color) {
-    fun render(): Array<Array<Color>> {
+    fun render(): Image {
         // compute image dimensions, initialize image array
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
@@ -14,6 +15,7 @@ class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<
 
         val onePercent = round(imageWidth / 100.0).toInt()
         for(x in image.indices) {
+            // status bar
             if(x % onePercent == 0) {
                 print('[')
                 for(i in 0..19) {
@@ -57,7 +59,10 @@ class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<
                         }
 
                         if(lighted) {
-                            color = intersection.color
+                            // TODO divide by PI?
+                            // color = objColor * lightColor * lightIntensity * (normal dot lightRay)
+                            val brightness = max(0.0, intersection.normal dot (light.point - intersection.point).normalized())
+                            color = intersection.color * brightness
                             break
                         }
                     }
@@ -67,6 +72,6 @@ class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<
         }
         println("[====================] (100%)")
 
-        return image
+        return Image(image)
     }
 }
