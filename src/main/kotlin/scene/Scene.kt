@@ -2,8 +2,8 @@ package scene
 
 import kotlin.math.round
 import kotlin.math.max
+
 import hittables.Hittable
-import models.Color
 import models.*
 
 class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<Light>, val backgroundColor: Color) {

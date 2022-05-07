@@ -1,7 +1,7 @@
 package hittables
 
-import models.Color
 import kotlin.math.abs
+
 import models.*
 
 open class Plane(point: Vector3, private val normal: Vector3, private val color: Color) : Hittable {

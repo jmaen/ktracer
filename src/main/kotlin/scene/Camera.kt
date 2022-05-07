@@ -1,7 +1,6 @@
 package scene
 
 import models.Vector3
-import kotlin.IllegalArgumentException
 
 data class Camera(
     val point: Vector3,

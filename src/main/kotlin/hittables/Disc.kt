@@ -1,6 +1,5 @@
 package hittables
 
-import models.Color
 import models.*
 
 class Disc(private val center: Vector3, normal: Vector3, private val radius: Double, color: Color) : Plane(center, normal, color) {

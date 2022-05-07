@@ -1,9 +1,10 @@
 package scene
 
-import models.Color
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+
+import models.Color
 
 class Image(private val image: Array<Array<Color>>) {
     fun saveToFile(fileName: String) {

@@ -1,7 +1,7 @@
 package hittables
 
-import models.Color
 import kotlin.math.sqrt
+
 import models.*
 
 class Sphere(private val center: Vector3, private val radius: Double, private val color: Color) : Hittable {
