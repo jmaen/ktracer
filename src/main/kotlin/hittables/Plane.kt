@@ -2,9 +2,10 @@ package hittables
 
 import kotlin.math.abs
 
-import models.*
+import geometry.*
+import shading.Material
 
-open class Plane(point: Vector3, private val normal: Vector3, private val color: Color) : Hittable {
+open class Plane(point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
     private val pn = point dot normal
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit?  {
@@ -24,7 +25,7 @@ open class Plane(point: Vector3, private val normal: Vector3, private val color:
             if(t in tMin..tMax) {
                 val intersection = ray.pointAt(t)
                 n = if(dn < 0) n else -n  // make sure normal points at the ray origin
-                return Hit(intersection, n, t, color)
+                return Hit(intersection, n, ray, t, material)
             }
         }
 

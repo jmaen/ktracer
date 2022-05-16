@@ -1,6 +1,6 @@
-package models
+package geometry
 
-class Ray(val origin: Vector3, var direction: Vector3) {
+data class Ray(val origin: Vector3, var direction: Vector3) {
     init {
         direction = direction.normalized()
     }

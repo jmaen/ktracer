@@ -1,4 +1,6 @@
-package models
+package geometry
+
+import shading.Color
 
 operator fun Int.times(other: Vector3): Vector3 {
     return other * this

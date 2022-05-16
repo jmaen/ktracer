@@ -1,6 +1,6 @@
 package scene
 
-import models.Vector3
+import geometry.Vector3
 
 data class Camera(
     val point: Vector3,

@@ -2,9 +2,10 @@ package hittables
 
 import kotlin.math.sqrt
 
-import models.*
+import geometry.*
+import shading.Material
 
-class Sphere(private val center: Vector3, private val radius: Double, private val color: Color) : Hittable {
+class Sphere(private val center: Vector3, private val radius: Double, private val material: Material) : Hittable {
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val co = ray.origin - center
         val d = ray.direction
@@ -26,7 +27,7 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
             val t = (-b - sqrt(discriminant)) / (2*a)  // only the smaller t is interesting -> no need to calculate second solution
             if(t in tMin..tMax) {
                 val intersection = ray.pointAt(t)
-                return Hit(intersection, normalAt(intersection), t, color)
+                return Hit(intersection, normalAt(intersection), ray, t, material)
             }
         }
 

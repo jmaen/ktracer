@@ -1,14 +1,25 @@
 package scene
 
-import kotlin.math.round
 import kotlin.math.max
+import kotlin.math.round
+import kotlin.math.pow
 
 import hittables.Hittable
-import models.*
+import shading.Color
+import shading.PointLight
+import shading.GlobalLight
+import geometry.*
 
-class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<Light>, val backgroundColor: Color) {
+class Scene(
+    private val camera: Camera,
+    private val hittables: List<Hittable>,
+    private val lights: List<PointLight>,
+    private val globalLight: GlobalLight = GlobalLight(Color.WHITE, 0.2),
+    private val backgroundColor: Color = Color.BLACK,
+    private val renderDistance: Double = 50.0) {
+
     fun render(): Image {
-        // compute image dimensions, initialize image array
+        // compute image dimensions, initialize image array with background color
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
         val image: Array<Array<Color>> = Array(imageWidth) { _ -> Array(imageHeight) { _ -> backgroundColor} }
@@ -17,7 +28,7 @@ class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<
         for(x in image.indices) {
             // status bar
             if(x % onePercent == 0) {
-                print('[')
+                print("Rendering: [")
                 for(i in 0..19) {
                     val c = if(x >= i * onePercent * 5) '=' else ' '
                     print(c)
@@ -32,46 +43,62 @@ class Scene(val camera: Camera, val hittables: List<Hittable>, val lights: List<
                 val point = camera.canvasOrigin + horizontal + vertical
 
                 // determine the nearest hit (if any)
-                val pixelRay = Ray(camera.point, point - camera.point)
-                var nearestHit: Hit? = null
-                for(hittable in hittables) {
-                    val hit = hittable.hit(pixelRay, 0.0, 20.0)
-                    if(hit != null && (nearestHit == null || hit.t < nearestHit.t)) {
-                        nearestHit = hit
-                    }
-                }
+                val ray = Ray(camera.point, point - camera.point)
+                val nearestHit = trace(ray)
 
-                // check if intersection is lighted, assign color
-                val intersection = nearestHit
-                if(intersection != null) {
-                    var color = Color(0, 0, 0)
-                    for (light in lights) {
-                        val direction = light.point - intersection.point
-                        // add offset to intersection so it does not hit itself
-                        val lightRay = Ray(intersection.point + intersection.normal*0.0001, direction)
-                        var lighted = true
-                        for (hittable in hittables) {
-                            val hit = hittable.hit(lightRay, 0.0, direction.length())
-                            if (hit != null) {
-                                lighted = false
-                                break
-                            }
-                        }
-
-                        if(lighted) {
-                            // TODO divide by PI?
-                            // color = objColor * lightColor * lightIntensity * (normal dot lightRay)
-                            val brightness = max(0.0, intersection.normal dot (light.point - intersection.point).normalized())
-                            color = intersection.color * brightness
-                            break
-                        }
-                    }
-                    image[x][y] = color
+                // if there is a hit, calculate shading
+                if(nearestHit != null) {
+                    image[x][y] = shade(nearestHit)
                 }
             }
         }
-        println("[====================] (100%)")
+        println("Rendering: [====================] (100%)")
+        println("Finished rendering!")
 
         return Image(image)
+    }
+
+    private fun trace(ray: Ray): Hit? {
+        var nearestHit: Hit? = null
+        for(hittable in hittables) {
+            val hit = hittable.hit(ray, 0.0, renderDistance)
+            if(hit != null && (nearestHit == null || hit.t < nearestHit.t)) {
+                nearestHit = hit
+            }
+        }
+
+        return nearestHit
+    }
+
+    private fun shade(hit: Hit): Color {
+        val (ambientColor, diffuseColor, specularColor, shininess) = hit.material
+        var color = ambientColor * globalLight.color * globalLight.intensity
+
+        for (light in lights) {
+            val lightDirection = light.point - hit.point
+
+            // check if hittable is between intersection and light source
+            val ray = Ray(hit.point + hit.normal*0.0001, lightDirection)  // add offset to hit so it does not hit itself
+            var shadow = false
+            for (hittable in hittables) {
+                if(hittable.hit(ray, 0.0, lightDirection.length()) != null) {  // only search for hittables in light distance
+                    shadow = true
+                    break
+                }
+            }
+
+            if(!shadow) {
+                val illumination = light.color * (light.intensity / (lightDirection.length()*lightDirection.length()))
+                val diffuse = diffuseColor * illumination * max(0.0, hit.normal dot lightDirection.normalized())
+
+                val viewDirection = -hit.ray.direction
+                val bisector = (lightDirection.normalized() + viewDirection).normalized()
+                val specular = specularColor * illumination * max(0.0, hit.normal dot bisector).pow(shininess)
+
+                color += diffuse + specular
+            }
+        }
+
+        return color
     }
 }
