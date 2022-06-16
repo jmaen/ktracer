@@ -1,28 +1,30 @@
 package scene
 
 import kotlin.math.max
-import kotlin.math.round
 import kotlin.math.pow
+import kotlin.math.round
 
-import hittables.Hittable
-import shading.Color
-import shading.PointLight
-import shading.GlobalLight
 import geometry.*
+import hittables.*
+import shading.Color
+import shading.GlobalLight
+import shading.PointLight
+
 
 class Scene(
     private val camera: Camera,
     private val hittables: List<Hittable>,
     private val lights: List<PointLight>,
-    private val globalLight: GlobalLight = GlobalLight(Color.WHITE, 0.2),
-    private val backgroundColor: Color = Color.BLACK,
-    private val renderDistance: Double = 50.0) {
+    private val globalLight: GlobalLight = GlobalLight(Color.WHITE, 0.1),
+    private val voidColor: Color = Color.BLACK,
+    private val renderDistance: Double = 50.0,
+    private val maxDepth: Int = 5) {
 
     fun render(): Image {
         // compute image dimensions, initialize image array with background color
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
-        val image: Array<Array<Color>> = Array(imageWidth) { _ -> Array(imageHeight) { _ -> backgroundColor} }
+        val image: Array<Array<Color>> = Array(imageWidth) { _ -> Array(imageHeight) { _ -> voidColor } }
 
         val onePercent = round(imageWidth / 100.0).toInt()
         for(x in image.indices) {
@@ -48,7 +50,7 @@ class Scene(
 
                 // if there is a hit, calculate shading
                 if(nearestHit != null) {
-                    image[x][y] = shade(nearestHit)
+                    image[x][y] = shade(nearestHit, 0)
                 }
             }
         }
@@ -59,6 +61,7 @@ class Scene(
     }
 
     private fun trace(ray: Ray): Hit? {
+        // find the nearest object hit by the ray
         var nearestHit: Hit? = null
         for(hittable in hittables) {
             val hit = hittable.hit(ray, 0.0, renderDistance)
@@ -70,8 +73,9 @@ class Scene(
         return nearestHit
     }
 
-    private fun shade(hit: Hit): Color {
-        val (ambientColor, diffuseColor, specularColor, shininess) = hit.material
+    private fun shade(hit: Hit, depth: Int): Color {
+        val (ambientColor, diffuseColor, specularColor, shininess, reflectiveness) = hit.material
+        // use ambient colors to account for environment light
         var color = ambientColor * globalLight.color * globalLight.intensity
 
         for (light in lights) {
@@ -79,23 +83,38 @@ class Scene(
 
             // check if hittable is between intersection and light source
             val ray = Ray(hit.point + hit.normal*0.0001, lightDirection)  // add offset to hit so it does not hit itself
-            var shadow = false
+            var isShadowed = false
             for (hittable in hittables) {
                 if(hittable.hit(ray, 0.0, lightDirection.length()) != null) {  // only search for hittables in light distance
-                    shadow = true
+                    isShadowed = true
                     break
                 }
             }
 
-            if(!shadow) {
+            if(!isShadowed) {
+                // calculate light with respect to light falloff
                 val illumination = light.color * (light.intensity / (lightDirection.length()*lightDirection.length()))
+
+                // lambertian shading
                 val diffuse = diffuseColor * illumination * max(0.0, hit.normal dot lightDirection.normalized())
 
-                val viewDirection = -hit.ray.direction
-                val bisector = (lightDirection.normalized() + viewDirection).normalized()
+                // specular shading (Blinn-Phong)
+                val cameraDirection = -hit.ray.direction
+                val bisector = (lightDirection.normalized() + cameraDirection).normalized()
                 val specular = specularColor * illumination * max(0.0, hit.normal dot bisector).pow(shininess)
 
                 color += diffuse + specular
+            }
+        }
+
+        // recursively calculate reflection
+        if(depth < maxDepth && reflectiveness != 0.0) {
+            val v = hit.ray.direction
+            val n = hit.normal
+            val reflection = v - 2*(v dot n)*n
+            val reflectedHit = trace(Ray(hit.point + hit.normal*0.0001, reflection))
+            if(reflectedHit != null) {
+                color += shade(reflectedHit, depth + 1) * reflectiveness
             }
         }
 
