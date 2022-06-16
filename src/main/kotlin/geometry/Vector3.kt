@@ -44,10 +44,10 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
     }
 
     infix fun cross(other: Vector3): Vector3 {
-        val x = y*other.z - z*other.y
-        val y = z*other.x - x*other.z
-        val z = x*other.y - y*other.x
-        return Vector3(x, y, z)
+        val crossX = y*other.z - z*other.y
+        val crossY = z*other.x - x*other.z
+        val crossZ = x*other.y - y*other.x
+        return Vector3(crossX, crossY, crossZ)
     }
 
     fun length(): Double {
