@@ -7,7 +7,7 @@ import javax.imageio.ImageIO
 import shading.Color
 
 class Image(private val image: Array<Array<Color>>) {
-    fun saveToFile(fileName: String) {
+    fun save(path: String) {
         val buffer = BufferedImage(image.size, image[0].size, BufferedImage.TYPE_INT_RGB)
         for(i in 0 until buffer.width) {
             for(j in 0 until buffer.height) {
@@ -17,7 +17,7 @@ class Image(private val image: Array<Array<Color>>) {
             }
         }
 
-        val file = File(fileName)
+        val file = File(path)
         ImageIO.write(buffer, "png", file)
     }
 }

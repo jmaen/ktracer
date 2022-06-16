@@ -23,7 +23,7 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
         val c = (co dot co) - r*r
 
         val discriminant = b*b - 4*a*c
-        if(discriminant >= 0) {  // at least 1 solution
+        if(discriminant >= 0) {  // there is at least 1 solution
             val t = (-b - sqrt(discriminant)) / (2*a)  // only the smaller t is interesting -> no need to calculate second solution
             if(t in tMin..tMax) {
                 val intersection = ray.pointAt(t)
