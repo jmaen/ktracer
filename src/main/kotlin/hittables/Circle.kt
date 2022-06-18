@@ -9,14 +9,23 @@ class Circle(private val center: Vector3, normal: Vector3, private val radius: D
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val hit = plane.hit(ray, tMin, tMax)
 
-        // if plane is hit, check if point is in circle
+        // if plane is hit, check if hit point is inside the circle
         if(hit != null) {
-            val distance = (hit.point - center).length()
-            if(distance <= radius) {
+            if(checkCircle(hit.point)) {
                 return hit
             }
         }
 
         return null
+    }
+
+    override fun checkPoint(point: Vector3): Boolean {
+        return plane.checkPoint(point) && checkCircle(point)
+    }
+
+    private fun checkCircle(point: Vector3): Boolean {
+        // check if point is inside the circle
+        val distance = (point - center).length()
+        return (distance <= radius)
     }
 }

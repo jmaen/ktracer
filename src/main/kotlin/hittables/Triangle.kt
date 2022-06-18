@@ -13,18 +13,31 @@ class Triangle(private val vertex0: Vector3, private val vertex1: Vector3, priva
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val hit = plane.hit(ray, tMin, tMax)
 
-        // if plane is hit, check if point is in triangle
+        // if plane is hit, check if point is inside the triangle
         if(hit != null) {
-            val c0 = hit.point - vertex0
-            val c1 = hit.point - vertex1
-            val c2 = hit.point - vertex2
-            if(normal dot (edge0 cross c0) > 0 &&
-                normal dot (edge1 cross c1) > 0 &&
-                normal dot (edge2 cross c2) > 0) {
+            if(checkTriangle(hit.point)) {
                 return hit
             }
         }
 
         return null
+    }
+
+    override fun checkPoint(point: Vector3): Boolean {
+        return plane.checkPoint(point) && checkTriangle(point)
+    }
+
+    private fun checkTriangle(point: Vector3): Boolean {
+        // check if point is inside the triangle
+        val c0 = point - vertex0
+        val c1 = point - vertex1
+        val c2 = point - vertex2
+        if(normal dot (edge0 cross c0) > 0 &&
+            normal dot (edge1 cross c1) > 0 &&
+            normal dot (edge2 cross c2) > 0) {
+            return true
+        }
+
+        return false
     }
 }

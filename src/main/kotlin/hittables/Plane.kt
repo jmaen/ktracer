@@ -6,11 +6,11 @@ import geometry.*
 import shading.Material
 
 open class Plane(point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
-    private val pn = point dot normal
+    private val d = point dot normal
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit?  {
-        val o = ray.origin
-        val d = ray.direction
+        val or = ray.origin
+        val di = ray.direction
         var n = normal
 
         /*
@@ -19,9 +19,9 @@ open class Plane(point: Vector3, private val normal: Vector3, private val materi
         <=> (o + t*d) ⋅ n = pn
         <=> t = (pn - (o ⋅ n)) / (d ⋅ n)
          */
-        val dn = d dot n
+        val dn = di dot n
         if(abs(dn) > 0.0001) {  // ray is not (almost) parallel to plane
-            val t = (pn - (o dot n)) / dn
+            val t = (d - (or dot n)) / dn
             if(t in tMin..tMax) {
                 val intersection = ray.pointAt(t)
                 n = if(dn < 0) n else -n  // make sure normal points at the ray origin
@@ -30,5 +30,9 @@ open class Plane(point: Vector3, private val normal: Vector3, private val materi
         }
 
         return null
+    }
+
+    override fun checkPoint(point: Vector3): Boolean {
+        return (point dot normal == d)
     }
 }

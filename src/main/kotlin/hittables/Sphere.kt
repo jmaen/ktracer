@@ -34,6 +34,11 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
         return null
     }
 
+    override fun checkPoint(point: Vector3): Boolean {
+        val distance = (point - center).length()
+        return (distance <= radius)
+    }
+
     private fun normalAt(point: Vector3): Vector3 {
         return (point - center).normalized()
     }
