@@ -7,7 +7,8 @@ data class Camera(
     val canvasOrigin: Vector3,
     val canvasWidth: Double,
     val canvasHeight: Double,
-    val pixelsPerUnit: Int
+    val pixelsPerUnit: Int,
+    val samplesPerPixel: Int
     ) {
     init {
         if(point.z <= 0) {

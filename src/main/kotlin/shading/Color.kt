@@ -4,21 +4,15 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
 
-class Color {
-    private var red: Double
-    private var green: Double
-    private var blue: Double
-
-    constructor(r: Double, g: Double, b: Double) {
-        red = clip(r)
-        green = clip(g)
-        blue = clip(b)
+data class Color(var red: Double, var green: Double, var blue: Double) {
+    init {
+        red = clip(red)
+        green = clip(green)
+        blue = clip(blue)
     }
 
     constructor(r: Int, g: Int, b: Int) : this(r / 255.0, g / 255.0, b / 255.0)
-
     constructor(c: Double) : this(c, c, c)
-
     constructor(c: Int) : this(c, c, c)
 
     operator fun plus(other: Color): Color {
@@ -45,6 +39,10 @@ class Color {
         rgb = (rgb shl 8) + round(green * 255).toInt()
         rgb = (rgb shl 8) + round(blue * 255).toInt()
         return rgb
+    }
+
+    override fun toString(): String {
+        return "($red, $green, $blue)"
     }
 
     private fun clip(x: Double): Double {

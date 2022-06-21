@@ -3,6 +3,7 @@ package scene
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
+import kotlin.random.Random
 
 import geometry.*
 import hittables.*
@@ -19,6 +20,8 @@ class Scene(
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 50.0,
     private val maxDepth: Int = 5) {
+    private val horizontalVector = Vector3(camera.canvasWidth, 0.0, 0.0)
+    private val verticalVector = Vector3(0.0, camera.canvasHeight, 0.0)
 
     fun render(): Image {
         // compute image dimensions, initialize image array with background color
@@ -39,19 +42,37 @@ class Scene(
             }
 
             for(y in image[0].indices) {
-                // calculate 3d point for pixel
-                val horizontal = (x.toDouble() / imageWidth) * Vector3(camera.canvasWidth, 0.0, 0.0)
-                val vertical = (y.toDouble() / imageHeight) * Vector3(0.0, camera.canvasHeight, 0.0)
-                val point = camera.canvasOrigin + horizontal + vertical
+                var red = 0.0
+                var green = 0.0
+                var blue = 0.0
+                val spp = camera.samplesPerPixel
+                for(sample in 0 until spp) {
+                    // calculate random contributions for supersampling (none if there is only one sample per pixel)
+                    val randomX = if(spp == 1) 0.0 else Random.nextDouble()
+                    val randomY = if(spp == 1) 0.0 else Random.nextDouble()
 
-                // determine the nearest hit (if any)
-                val ray = Ray(camera.point, point - camera.point)
-                val nearestHit = trace(ray)
+                    // calculate 3d point for pixel (nextDouble() < 1, so numerator is < x+1)
+                    val horizontal = ((x.toDouble() + randomX) / imageWidth)
+                    val vertical = ((y.toDouble() + randomY) / imageHeight)
+                    val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
 
-                // if there is a hit, calculate shading
-                if(nearestHit != null) {
-                    image[x][y] = shade(nearestHit, 0)
+                    // determine the nearest hit (if any)
+                    val ray = Ray(camera.point, point - camera.point)
+                    val nearestHit = trace(ray)
+
+                    // if there is a hit, calculate shading
+                    if (nearestHit != null) {
+                        val (r, g, b) = shade(nearestHit, 0)
+                        red += r
+                        green += g
+                        blue += b
+                    }
                 }
+                // take average of all samples
+                red /= camera.samplesPerPixel
+                green /= camera.samplesPerPixel
+                blue /= camera.samplesPerPixel
+                image[x][y] = Color(red, green, blue)
             }
         }
         println("Rendering: [====================] (100%)")
@@ -109,9 +130,7 @@ class Scene(
 
         // recursively calculate reflection
         if(depth < maxDepth && reflectiveness != 0.0) {
-            val v = hit.ray.direction
-            val n = hit.normal
-            val reflection = v - 2*(v dot n)*n
+            val reflection = hit.ray.direction.reflected(hit.normal)
             val reflectedHit = trace(Ray(hit.point + hit.normal*0.0001, reflection))
             if(reflectedHit != null) {
                 color += shade(reflectedHit, depth + 1) * reflectiveness
