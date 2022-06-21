@@ -58,6 +58,10 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
         return this / length()
     }
 
+    fun reflected(normal: Vector3): Vector3 {
+        return this - 2*(this dot normal)*normal
+    }
+
     override fun toString(): String {
         return "($x, $y, $z)"
     }

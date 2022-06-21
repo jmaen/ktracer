@@ -24,10 +24,13 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
 
         val discriminant = b*b - 4*a*c
         if(discriminant >= 0) {  // there is at least 1 solution
-            val t = (-b - sqrt(discriminant)) / (2*a)  // only the smaller t is interesting -> no need to calculate second solution
+            var t = (-b - sqrt(discriminant)) / (2*a)  // only the smaller t is interesting
+            if(t < tMin) {
+                t = (-b + sqrt(discriminant)) / (2*a)  // camera might be inside the sphere -> try the bigger solution
+            }
             if(t in tMin..tMax) {
                 val intersection = ray.pointAt(t)
-                return Hit(intersection, normalAt(intersection), ray, t, material)
+                return Hit(intersection, intersection - center, ray, t, material)
             }
         }
 
@@ -36,10 +39,6 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
 
     override fun checkPoint(point: Vector3): Boolean {
         val distance = (point - center).length()
-        return (distance <= radius)
-    }
-
-    private fun normalAt(point: Vector3): Vector3 {
-        return (point - center).normalized()
+        return (distance == radius)
     }
 }
