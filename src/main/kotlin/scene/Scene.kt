@@ -3,7 +3,6 @@ package scene
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
-import kotlin.random.Random
 
 import geometry.*
 import hittables.*
@@ -45,33 +44,37 @@ class Scene(
                 var red = 0.0
                 var green = 0.0
                 var blue = 0.0
-                val spp = camera.samplesPerPixel
-                for(sample in 0 until spp) {
-                    // calculate random contributions for supersampling (none if there is only one sample per pixel)
-                    val randomX = if(spp == 1) 0.0 else Random.nextDouble()
-                    val randomY = if(spp == 1) 0.0 else Random.nextDouble()
+                val sf = camera.sampleFactor
+                for(i in 0 until sf) {
+                    for(j in 0 until sf) {
+                        // calculate offsets for supersampling
+                        val offsetX = i.toDouble() / sf
+                        val offsetY = j.toDouble() / sf
 
-                    // calculate 3d point for pixel (nextDouble() < 1, so numerator is < x+1)
-                    val horizontal = ((x.toDouble() + randomX) / imageWidth)
-                    val vertical = ((y.toDouble() + randomY) / imageHeight)
-                    val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
+                        // calculate 3d point for pixel (nextDouble() < 1, so numerator is < x+1)
+                        val horizontal = ((x.toDouble() + offsetX) / imageWidth)
+                        val vertical = ((y.toDouble() + offsetY) / imageHeight)
+                        val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
 
-                    // determine the nearest hit (if any)
-                    val ray = Ray(camera.point, point - camera.point)
-                    val nearestHit = trace(ray)
+                        // determine the nearest hit (if any)
+                        val ray = Ray(camera.point, point - camera.point)
+                        val nearestHit = trace(ray)
 
-                    // if there is a hit, calculate shading
-                    if (nearestHit != null) {
-                        val (r, g, b) = shade(nearestHit, 0)
-                        red += r
-                        green += g
-                        blue += b
+                        // if there is a hit, calculate shading
+                        if (nearestHit != null) {
+                            val (r, g, b) = shade(nearestHit, 0)
+                            red += r
+                            green += g
+                            blue += b
+                        }
                     }
                 }
+
                 // take average of all samples
-                red /= camera.samplesPerPixel
-                green /= camera.samplesPerPixel
-                blue /= camera.samplesPerPixel
+                val samples = (sf.toDouble()).pow(2)
+                red /= samples
+                green /= samples
+                blue /= samples
                 image[x][y] = Color(red, green, blue)
             }
         }
