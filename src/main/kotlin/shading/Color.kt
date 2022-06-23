@@ -1,14 +1,13 @@
 package shading
 
-import kotlin.math.max
-import kotlin.math.min
+import util.clamp
 import kotlin.math.round
 
 data class Color(var red: Double, var green: Double, var blue: Double) {
     init {
-        red = clip(red)
-        green = clip(green)
-        blue = clip(blue)
+        red.clamp(0.0, 1.0)
+        green.clamp(0.0, 1.0)
+        blue.clamp(0.0, 1.0)
     }
 
     constructor(r: Int, g: Int, b: Int) : this(r / 255.0, g / 255.0, b / 255.0)
@@ -45,16 +44,8 @@ data class Color(var red: Double, var green: Double, var blue: Double) {
         return "($red, $green, $blue)"
     }
 
-    private fun clip(x: Double): Double {
-        return min(1.0, max(0.0, x))
-    }
-
     companion object {
         val BLACK = Color(0.0, 0.0, 0.0)
         val WHITE = Color(1.0, 1.0, 1.0)
     }
-}
-
-operator fun Double.times(other: Color): Color {
-    return other * this
 }

@@ -1,21 +1,18 @@
 package scene
 
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
+import kotlin.system.measureTimeMillis
 
 import geometry.*
 import hittables.*
 import shading.Color
 import shading.GlobalLight
 import shading.PointLight
-import java.sql.Time
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.system.measureTimeMillis
-
+import util.*
 
 class Scene(
     private val camera: Camera,
@@ -33,7 +30,7 @@ class Scene(
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val onePercent = round(imageWidth / 100.0).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
-        val image: Array<Array<Color>> = Array(imageWidth) { _ -> Array(imageHeight) { _ -> voidColor } }
+        val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { voidColor } }
 
         val millis = measureTimeMillis {
             for(x in image.indices) {
@@ -78,7 +75,7 @@ class Scene(
                     }
 
                     // take average of all samples
-                    val samples = (sf.toDouble()).pow(2)
+                    val samples = sf.pow(2)
                     red /= samples
                     green /= samples
                     blue /= samples

@@ -1,5 +1,7 @@
 package geometry
 
+import util.*
+
 data class Ray(val origin: Vector3, var direction: Vector3) {
     init {
         instanceCount++

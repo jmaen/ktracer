@@ -4,6 +4,7 @@ import kotlin.math.sqrt
 
 import geometry.*
 import shading.Material
+import util.*
 
 class Sphere(private val center: Vector3, private val radius: Double, private val material: Material) : Hittable {
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
@@ -16,7 +17,7 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
         (px - cx)^2 + (py - cy)^2 + (pz - cz)^2 = r^2
         <=> (p - c) ⋅ (p - c) = r^2
         <=> (o + t*d - c) ⋅ (o + t*d - c) = r^2
-        <=> (d ⋅ d)t^2 + (2d ⋅ (o - c))t + (o - c) ⋅ (o - c) - r^2 = 0
+        <=> (d ⋅ d)*t^2 + (2d ⋅ (o - c))*t + (o - c) ⋅ (o - c) - r^2 = 0
          */
         val a = d dot d
         val b = 2*d dot co
