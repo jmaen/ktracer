@@ -9,6 +9,12 @@ import hittables.*
 import shading.Color
 import shading.GlobalLight
 import shading.PointLight
+import java.sql.Time
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.system.measureTimeMillis
 
 
 class Scene(
@@ -25,61 +31,69 @@ class Scene(
     fun render(): Image {
         // compute image dimensions, initialize image array with background color
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
+        val onePercent = round(imageWidth / 100.0).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
         val image: Array<Array<Color>> = Array(imageWidth) { _ -> Array(imageHeight) { _ -> voidColor } }
 
-        val onePercent = round(imageWidth / 100.0).toInt()
-        for(x in image.indices) {
-            // status bar
-            if(x % onePercent == 0) {
-                print("Rendering: [")
-                for(i in 0..19) {
-                    val c = if(x >= i * onePercent * 5) '=' else ' '
-                    print(c)
+        val millis = measureTimeMillis {
+            for(x in image.indices) {
+                // status bar
+                if(x % onePercent == 0) {
+                    print("Rendering: [")
+                    for(i in 0..19) {
+                        val c = if(x >= i * onePercent * 5) '=' else ' '
+                        print(c)
+                    }
+                    print("] (${round(x.toDouble() / imageWidth * 100)}%)\r")
                 }
-                print("] (${round(x.toDouble() / imageWidth * 100)}%)\r")
-            }
 
-            for(y in image[0].indices) {
-                var red = 0.0
-                var green = 0.0
-                var blue = 0.0
-                val sf = camera.sampleFactor
-                for(i in 0 until sf) {
-                    for(j in 0 until sf) {
-                        // calculate offsets for supersampling
-                        val offsetX = i.toDouble() / sf
-                        val offsetY = j.toDouble() / sf
+                for(y in image[0].indices) {
+                    var red = 0.0
+                    var green = 0.0
+                    var blue = 0.0
+                    val sf = camera.sampleFactor
+                    for(i in 0 until sf) {
+                        for(j in 0 until sf) {
+                            // calculate offsets for supersampling
+                            val offsetX = i.toDouble() / sf
+                            val offsetY = j.toDouble() / sf
 
-                        // calculate 3d point for pixel (nextDouble() < 1, so numerator is < x+1)
-                        val horizontal = ((x.toDouble() + offsetX) / imageWidth)
-                        val vertical = ((y.toDouble() + offsetY) / imageHeight)
-                        val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
+                            // calculate 3d point for pixel (nextDouble() < 1, so numerator is < x+1)
+                            val horizontal = ((x.toDouble() + offsetX) / imageWidth)
+                            val vertical = ((y.toDouble() + offsetY) / imageHeight)
+                            val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
 
-                        // determine the nearest hit (if any)
-                        val ray = Ray(camera.point, point - camera.point)
-                        val nearestHit = trace(ray)
+                            // determine the nearest hit (if any)
+                            val ray = Ray(camera.point, point - camera.point)
+                            val nearestHit = trace(ray)
 
-                        // if there is a hit, calculate shading
-                        if (nearestHit != null) {
-                            val (r, g, b) = shade(nearestHit, 0)
-                            red += r
-                            green += g
-                            blue += b
+                            // if there is a hit, calculate shading
+                            if (nearestHit != null) {
+                                val (r, g, b) = shade(nearestHit, 0)
+                                red += r
+                                green += g
+                                blue += b
+                            }
                         }
                     }
-                }
 
-                // take average of all samples
-                val samples = (sf.toDouble()).pow(2)
-                red /= samples
-                green /= samples
-                blue /= samples
-                image[x][y] = Color(red, green, blue)
+                    // take average of all samples
+                    val samples = (sf.toDouble()).pow(2)
+                    red /= samples
+                    green /= samples
+                    blue /= samples
+                    image[x][y] = Color(red, green, blue)
+                }
             }
         }
         println("Rendering: [====================] (100%)")
-        println("Finished rendering!")
+        // print summary
+        val rays = String.format(Locale.US, "%,d", Ray.instanceCount)
+        val hours = TimeUnit.MILLISECONDS.toHours(millis)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(hours)
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(minutes)
+        val time = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        println("Finished rendering! Spawned $rays rays in $time.")
 
         return Image(image)
     }
