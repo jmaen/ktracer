@@ -3,7 +3,7 @@ package hittables
 import geometry.*
 import shading.Material
 
-class Circle(private val center: Vector3, normal: Vector3, private val radius: Double, material: Material) : Hittable {
+class Disk(private val center: Vector3, normal: Vector3, private val radius: Double, material: Material) : Hittable {
     private val plane: Plane = Plane(center, normal, material)
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {

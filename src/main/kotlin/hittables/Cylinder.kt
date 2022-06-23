@@ -5,8 +5,8 @@ import shading.Material
 import kotlin.math.sqrt
 
 class Cylinder(private val center1: Vector3, private val center2: Vector3, private val radius: Double, private val material: Material) : Hittable {
-    private val circle1 = Circle(center1, center1 - center2, radius, material)
-    private val circle2 = Circle(center2, center2 - center1, radius, material)
+    private val disk1 = Disk(center1, center1 - center2, radius, material)
+    private val disk2 = Disk(center2, center2 - center1, radius, material)
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val ao = ray.origin - center1
@@ -40,13 +40,13 @@ class Cylinder(private val center1: Vector3, private val center2: Vector3, priva
             }
         }
 
-        val h1 = circle1.hit(ray, tMin, tMax)
+        val h1 = disk1.hit(ray, tMin, tMax)
         val t1 = h1?.t
         if(t1 != null && t1 in tMin..tMax && (smallestT == null || t1 < smallestT)) {
             smallestT = t1
             normal = h1.normal
         }
-        val h2 = circle2.hit(ray, tMin, tMax)
+        val h2 = disk2.hit(ray, tMin, tMax)
         val t2 = h2?.t
         if(t2 != null && t2 in tMin..tMax && (smallestT == null || t2 < smallestT)) {
             smallestT = t2
