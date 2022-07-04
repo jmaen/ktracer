@@ -1,9 +1,14 @@
 package hittables
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+
 import geometry.*
 import shading.Material
 
-class Triangle(private val vertex0: Vector3, private val vertex1: Vector3, private val vertex2: Vector3, material: Material) : Hittable {
+@Serializable
+@SerialName("triangle")
+class Triangle(private val vertex0: Vector3, private val vertex1: Vector3, private val vertex2: Vector3, private val material: Material) : Hittable {
     private val normal = (vertex1 - vertex0) cross (vertex2 - vertex0)
     private val plane = Plane(vertex0, normal, material)
     private val edge0 = vertex1 - vertex0

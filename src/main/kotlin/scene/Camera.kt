@@ -1,7 +1,10 @@
 package scene
 
+import kotlinx.serialization.Serializable
+
 import geometry.Vector3
 
+@Serializable
 data class Camera(
     val point: Vector3,
     val canvasOrigin: Vector3,

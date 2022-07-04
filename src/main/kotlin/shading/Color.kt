@@ -1,13 +1,16 @@
 package shading
 
-import util.clamp
 import kotlin.math.round
+import kotlinx.serialization.Serializable
 
+import util.clamp
+
+@Serializable
 data class Color(var red: Double, var green: Double, var blue: Double) {
     init {
-        red.clamp(0.0, 1.0)
-        green.clamp(0.0, 1.0)
-        blue.clamp(0.0, 1.0)
+        red = red.clamp(0.0, 1.0)
+        green = green.clamp(0.0, 1.0)
+        blue = blue.clamp(0.0, 1.0)
     }
 
     constructor(r: Int, g: Int, b: Int) : this(r / 255.0, g / 255.0, b / 255.0)

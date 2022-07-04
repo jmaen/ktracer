@@ -19,10 +19,10 @@ operator fun Double.times(other: Color): Color {
     return other * this
 }
 
-fun Double.clamp(min: Double, max: Double): Double {
-    return min(max, max(min, this))
-}
-
 fun Int.pow(n: Int): Double {
     return this.toDouble().pow(n)
+}
+
+fun Double.clamp(lower: Double, upper: Double): Double {
+    return min(upper, max(lower, this))
 }

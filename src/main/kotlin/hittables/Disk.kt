@@ -1,9 +1,14 @@
 package hittables
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+
 import geometry.*
 import shading.Material
 
-class Disk(private val center: Vector3, normal: Vector3, private val radius: Double, material: Material) : Hittable {
+@Serializable
+@SerialName("disk")
+class Disk(private val center: Vector3, private val normal: Vector3, private val radius: Double, private val material: Material) : Hittable {
     private val plane: Plane = Plane(center, normal, material)
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {

@@ -1,11 +1,15 @@
 package hittables
 
 import kotlin.math.abs
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 import geometry.*
 import shading.Material
 
-open class Plane(point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
+@Serializable
+@SerialName("plane")
+open class Plane(private val point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
     private val d = point dot normal
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit?  {

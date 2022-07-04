@@ -1,9 +1,11 @@
 package geometry
 
 import kotlin.math.sqrt
+import kotlinx.serialization.Serializable
 
 import util.*
 
+@Serializable
 data class Vector3(val x: Double, val y: Double, val z: Double) {
     constructor(x: Int, y: Int, z: Int) : this(x.toDouble(), y.toDouble(), z.toDouble())
     constructor(x: Int, y: Int, z: Double) : this(x.toDouble(), y.toDouble(), z)

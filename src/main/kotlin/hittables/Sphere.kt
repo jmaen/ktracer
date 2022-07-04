@@ -1,11 +1,15 @@
 package hittables
 
 import kotlin.math.sqrt
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 import geometry.*
 import shading.Material
 import util.*
 
+@Serializable
+@SerialName("sphere")
 class Sphere(private val center: Vector3, private val radius: Double, private val material: Material) : Hittable {
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val co = ray.origin - center

@@ -1,9 +1,14 @@
 package hittables
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
+
 import geometry.*
 import shading.Material
 
-class Polygon(vararg vertices: Vector3, private val material: Material) : Hittable {
+@Serializable
+@SerialName("polygon")
+class Polygon(private vararg val vertices: Vector3, private val material: Material) : Hittable {
     private val triangles: List<Triangle>
     private val plane: Plane
 

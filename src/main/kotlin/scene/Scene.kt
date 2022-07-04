@@ -1,19 +1,23 @@
 package scene
 
+import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.system.measureTimeMillis
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 import geometry.*
 import hittables.*
-import shading.Color
-import shading.GlobalLight
-import shading.PointLight
+import shading.*
 import util.*
 
+@Serializable
 class Scene(
     private val camera: Camera,
     private val hittables: List<Hittable>,
@@ -152,5 +156,18 @@ class Scene(
         }
 
         return color
+    }
+
+    fun save(path: String) {
+        val format = Json { prettyPrint = true }
+        val json = format.encodeToString(this)
+        File(path).writeText(json)
+    }
+
+    companion object {
+        fun load(path: String): Scene {
+            val json = File(path).readText()
+            return Json.decodeFromString(json)
+        }
     }
 }
