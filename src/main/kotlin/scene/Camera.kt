@@ -11,7 +11,10 @@ data class Camera(
     val canvasWidth: Double,
     val canvasHeight: Double,
     val pixelsPerUnit: Int,
-    val sampleFactor: Int
+    val superSamplingFactor: Int,
+    val focalLength: Double,
+    val aperture: Double,
+    val samplesPerRay: Int
     ) {
     init {
         if(point.z <= 0) {
