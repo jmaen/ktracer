@@ -1,10 +1,10 @@
-package hittables
+package objects
 
 import kotlin.math.sqrt
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
-import geometry.*
+import models.*
 import shading.Material
 import util.*
 

@@ -2,7 +2,7 @@ package scene
 
 import kotlinx.serialization.Serializable
 
-import geometry.Vector3
+import models.Vector3
 
 @Serializable
 data class Camera(

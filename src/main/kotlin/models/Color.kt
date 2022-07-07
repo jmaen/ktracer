@@ -1,4 +1,4 @@
-package shading
+package models
 
 import kotlin.math.round
 import kotlinx.serialization.Serializable

@@ -1,8 +1,8 @@
-package hittables
+package objects
 
 import kotlinx.serialization.Serializable
 
-import geometry.*
+import models.*
 
 @Serializable
 sealed interface Hittable {

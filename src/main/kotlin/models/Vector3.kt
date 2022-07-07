@@ -1,4 +1,4 @@
-package geometry
+package models
 
 import kotlin.math.sqrt
 import kotlinx.serialization.Serializable

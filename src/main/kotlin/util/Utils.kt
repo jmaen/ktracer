@@ -4,8 +4,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
-import geometry.Vector3
-import shading.Color
+import models.Vector3
+import models.Color
 
 operator fun Int.times(other: Vector3): Vector3 {
     return other * this

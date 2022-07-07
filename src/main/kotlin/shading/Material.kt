@@ -1,5 +1,6 @@
 package shading
 
+import models.Color
 import kotlinx.serialization.Serializable
 
 import util.*

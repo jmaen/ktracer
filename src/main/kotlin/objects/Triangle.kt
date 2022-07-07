@@ -1,9 +1,9 @@
-package hittables
+package objects
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
-import geometry.*
+import models.*
 import shading.Material
 
 @Serializable

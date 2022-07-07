@@ -1,4 +1,4 @@
-package geometry
+package models
 
 import shading.Material
 

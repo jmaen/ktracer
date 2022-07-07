@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import java.io.File
 
-import shading.Color
+import models.Color
 
 class Image(private val image: Array<Array<Color>>) {
     fun save(path: String) {

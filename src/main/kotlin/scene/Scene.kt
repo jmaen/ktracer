@@ -3,18 +3,16 @@ package scene
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.*
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 
-import geometry.*
-import hittables.*
-import shading.*
+import models.*
+import lights.*
+import objects.*
 import util.*
-import kotlin.math.*
 
 @Serializable
 class Scene(
@@ -96,6 +94,7 @@ class Scene(
                                     bl += b
                                 }
                             }
+
                             // take average of all samples
                             red +=  re / camera.samplesPerRay
                             green += gr / camera.samplesPerRay
@@ -146,32 +145,47 @@ class Scene(
         var color = ambientColor * globalLight.color * globalLight.intensity
 
         for (light in lights) {
-            val lightDirection = light.point - hit.point
+            val points = light.getPoints()
+            var red = 0.0
+            var green = 0.0
+            var blue = 0.0
+            for(point in points) {
+                val lightDirection = point - hit.point
 
-            // check if hittable is between intersection and light source
-            val ray = Ray(hit.point + hit.normal*0.0001, lightDirection)  // add offset to hit so it does not hit itself
-            var isShadowed = false
-            for (hittable in hittables) {
-                if(hittable.hit(ray, 0.0, lightDirection.length()) != null) {  // only search for hittables in light distance
-                    isShadowed = true
-                    break
+                // check if hittable is between intersection and light source
+                val ray = Ray(hit.point + hit.normal*0.0001, lightDirection)  // add offset to hit so it does not hit itself
+                var isShadowed = false
+                for (hittable in hittables) {
+                    if(hittable.hit(ray, 0.0, lightDirection.length()) != null) {  // only search for hittables in light distance
+                        isShadowed = true
+                        break
+                    }
+                }
+
+                if(!isShadowed) {
+                    // calculate light with respect to light falloff
+                    val illumination = light.color * (light.intensity / (lightDirection.length()*lightDirection.length()))
+
+                    // lambertian shading
+                    val diffuse = diffuseColor * illumination * max(0.0, hit.normal dot lightDirection.normalized())
+
+                    // specular shading (Blinn-Phong)
+                    val cameraDirection = -hit.ray.direction
+                    val bisector = (lightDirection.normalized() + cameraDirection).normalized()
+                    val specular = specularColor * illumination * max(0.0, hit.normal dot bisector).pow(shininess)
+
+                    val (r, g, b) = diffuse + specular
+                    red += r
+                    green += g
+                    blue += b
                 }
             }
 
-            if(!isShadowed) {
-                // calculate light with respect to light falloff
-                val illumination = light.color * (light.intensity / (lightDirection.length()*lightDirection.length()))
-
-                // lambertian shading
-                val diffuse = diffuseColor * illumination * max(0.0, hit.normal dot lightDirection.normalized())
-
-                // specular shading (Blinn-Phong)
-                val cameraDirection = -hit.ray.direction
-                val bisector = (lightDirection.normalized() + cameraDirection).normalized()
-                val specular = specularColor * illumination * max(0.0, hit.normal dot bisector).pow(shininess)
-
-                color += diffuse + specular
-            }
+            // take average of samples
+            red /= points.size
+            green /= points.size
+            blue /= points.size
+            color += Color(red, green, blue)
         }
 
         // recursively calculate reflection
