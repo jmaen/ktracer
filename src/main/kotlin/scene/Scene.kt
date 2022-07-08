@@ -18,9 +18,9 @@ import util.*
 class Scene(
     private val camera: Camera,
     private val hittables: List<Hittable>,
-    private val lights: List<PointLight>,
+    private val lights: List<PositionalLight>,
     private val globalLight: GlobalLight = GlobalLight(Color.WHITE, 0.2),
-    private val voidColor: Color = Color.WHITE,
+    private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 50.0,
     private val maxDepth: Int = 5) {
 
