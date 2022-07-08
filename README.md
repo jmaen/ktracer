@@ -3,6 +3,7 @@
 
 It currently supports:
 - Multiple objects (spheres, cylinders, planes, disks, triangles and convex polygons)
+- Multiple lights (point, disk and spherical lights)
 - Blinn-Phong shading
 - Reflections
 - Anti-aliasing (SSAA) 
