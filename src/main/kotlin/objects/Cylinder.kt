@@ -3,6 +3,7 @@ package objects
 import kotlin.math.sqrt
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Transient
 
 import models.*
 import shading.Material
@@ -11,7 +12,9 @@ import util.*
 @Serializable
 @SerialName("cylinder")
 class Cylinder(private val center1: Vector3, private val center2: Vector3, private val radius: Double, private val material: Material) : Hittable {
+    @Transient
     private val disk1 = Disk(center1, center1 - center2, radius, material)
+    @Transient
     private val disk2 = Disk(center2, center2 - center1, radius, material)
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {

@@ -2,6 +2,7 @@ package objects
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Transient
 
 import models.*
 import shading.Material
@@ -9,6 +10,7 @@ import shading.Material
 @Serializable
 @SerialName("disk")
 class Disk(private val center: Vector3, private val normal: Vector3, private val radius: Double, private val material: Material) : Hittable {
+    @Transient
     private val plane: Plane = Plane(center, normal, material)
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {

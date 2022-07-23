@@ -2,6 +2,7 @@ package objects
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Transient
 
 import models.*
 import shading.Material
@@ -9,8 +10,10 @@ import shading.Material
 @Serializable
 @SerialName("polygon")
 class Polygon(private vararg val vertices: Vector3, private val material: Material) : Hittable {
-    private val triangles: List<Triangle>
-    private val plane: Plane
+    @Transient
+    private lateinit var triangles: List<Triangle>
+    @Transient
+    private lateinit var plane: Plane
 
     init {
         val vertexList = vertices.asList()
@@ -50,9 +53,9 @@ class Polygon(private vararg val vertices: Vector3, private val material: Materi
     }
 
     private fun checkPolygon(point: Vector3): Boolean {
-        // check if point is inside one of the triangles
+        // check if point is inside the polygon (i.e. inside one of the triangles)
         for(triangle in triangles) {
-            if(triangle.checkPoint(point)) {
+            if(triangle.checkTriangle(point)) {
                 return true
             }
         }
@@ -79,11 +82,8 @@ class Polygon(private vararg val vertices: Vector3, private val material: Materi
     }
 
     private fun isConvexPolygon(vertices: List<Vector3>): Boolean {
+        // TODO
         return true
-    }
-
-    private fun calculateAngle() {
-        TODO()
     }
 
     private fun convertToTriangles(vertices: List<Vector3>): List<Triangle> {

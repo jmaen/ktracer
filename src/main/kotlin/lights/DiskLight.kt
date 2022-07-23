@@ -14,7 +14,7 @@ class DiskLight(val point: Vector3,
                 val radius: Double,
                 override val color: Color,
                 override val intensity: Double,
-                val sampleDensity: Int) : PositionalLight() {
+                private val sampleDensity: Int) : PositionalLight() {
     // calculate sample count from area and density
     private val sampleCount = ceil(PI * radius*radius * sampleDensity).toInt()
     // calculate two perpendicular vectors both perpendicular to normal
