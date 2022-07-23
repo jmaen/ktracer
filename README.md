@@ -3,6 +3,7 @@
 
 It currently supports:
 - Multiple objects (spheres, cylinders, planes, disks, triangles and convex polygons)
+- Multiple lights (point and disk lights)
 - Blinn-Phong shading
 - Reflections
 - Anti-aliasing (SSAA) 
@@ -10,5 +11,5 @@ It currently supports:
 - JSON serialization for scene creation
 
 ## Example renders
-![5](https://user-images.githubusercontent.com/47495425/177426572-ccaff289-8bc7-4d4e-9958-455621325ead.png)
-<p align="center">(~6,000,000,000 rays, 2x supersampling, 200 samples per ray for depth of field)</p>
+![8](https://user-images.githubusercontent.com/47495425/178040057-f7cf6b05-7147-4f76-8c27-4a201bcfdbb0.png)
+<p align="center">(>30,000,000,000 rays, 2x supersampling, 50 DOF samples)</p>
