@@ -4,8 +4,8 @@ import kotlin.math.sqrt
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
+import materials.Material
 import models.*
-import shading.Material
 import util.*
 
 @Serializable

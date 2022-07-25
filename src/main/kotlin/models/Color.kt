@@ -1,18 +1,13 @@
 package models
 
+import kotlin.math.pow
 import kotlin.math.round
 import kotlinx.serialization.Serializable
 
-import util.clamp
+import util.*
 
 @Serializable
 data class Color(var red: Double, var green: Double, var blue: Double) {
-    init {
-        red = red.clamp(0.0, 1.0)
-        green = green.clamp(0.0, 1.0)
-        blue = blue.clamp(0.0, 1.0)
-    }
-
     constructor(r: Int, g: Int, b: Int) : this(r / 255.0, g / 255.0, b / 255.0)
     constructor(c: Double) : this(c, c, c)
     constructor(c: Int) : this(c, c, c)
@@ -20,6 +15,11 @@ data class Color(var red: Double, var green: Double, var blue: Double) {
     operator fun plus(other: Color): Color {
         return Color(red + other.red, green + other.green, blue + other.blue)
     }
+
+    operator fun times(other: Int): Color {
+        return Color(red * other, green * other, blue * other)
+    }
+
     operator fun times(other: Double): Color {
         return Color(red * other, green * other, blue * other)
     }
@@ -28,12 +28,24 @@ data class Color(var red: Double, var green: Double, var blue: Double) {
         return Color(red * other.red, green * other.green, blue * other.blue)
     }
 
+    operator fun div(other: Int): Color {
+        return Color(red / other, green / other, blue / other)
+    }
+
     operator fun div(other: Double): Color {
         return Color(red / other, green / other, blue / other)
     }
 
     operator fun div(other: Color): Color {
         return Color(red / other.red, green / other.green, blue / other.blue)
+    }
+
+    fun clamp(): Color {
+        return Color(red.clamp(0.0, 1.0), green.clamp(0.0, 1.0), blue.clamp(0.0, 1.0))
+    }
+
+    fun gammaCorrect(gamma: Double = 2.0): Color {
+        return Color(red.pow(1 / gamma), green.pow(1 / gamma), blue.pow(1 / gamma))
     }
 
     fun toRGB(): Int {

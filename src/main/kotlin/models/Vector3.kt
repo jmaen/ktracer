@@ -4,6 +4,7 @@ import kotlin.math.sqrt
 import kotlinx.serialization.Serializable
 
 import util.*
+import kotlin.random.Random
 
 @Serializable
 data class Vector3(val x: Double, val y: Double, val z: Double) {
@@ -68,5 +69,11 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
 
     override fun toString(): String {
         return "($x, $y, $z)"
+    }
+
+    companion object {
+        fun random(min: Double, max: Double): Vector3 {
+            return Vector3(Random.nextDouble(min, max), Random.nextDouble(min, max), Random.nextDouble(min, max))
+        }
     }
 }
