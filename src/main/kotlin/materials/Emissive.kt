@@ -1,14 +1,18 @@
 package materials
 
-import models.Color
-import models.Hit
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
-class Emissive : Material() {
-    override fun bsdf(hit: Hit): Color {
-        TODO("Not yet implemented")
+import models.*
+
+@Serializable
+@SerialName("emissive")
+class Emissive(private val color: Color, private val strength: Double) : Material() {
+    override fun bsdf(hit: Hit): Sample? {
+        return null
     }
 
     override fun emit(hit: Hit): Color {
-        TODO("Not yet implemented")
+        return color * strength
     }
 }

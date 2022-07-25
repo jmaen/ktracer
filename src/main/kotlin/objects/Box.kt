@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
 import models.*
-import shading.Material
+import materials.Material
 
 @Serializable
 @SerialName("box")
@@ -52,6 +52,7 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         var vertexList = mutableListOf<Vector3>()
         var currentVertex: Vector3
 
+        // calculate the 4 vertices per face and create corresponding polygon
         for(i in 0..2) {
             currentVertex = corner1
             vertexList.add(currentVertex)
@@ -61,6 +62,7 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
             vertexList.add(currentVertex)
             currentVertex -= directions[i]
             vertexList.add(currentVertex)
+
             polygonList.add(Polygon(*vertexList.toTypedArray(), material = material))
             vertexList.clear()
         }
@@ -74,6 +76,7 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
             vertexList.add(currentVertex)
             currentVertex += directions[i]
             vertexList.add(currentVertex)
+
             polygonList.add(Polygon(*vertexList.toTypedArray(), material = material))
             vertexList.clear()
         }

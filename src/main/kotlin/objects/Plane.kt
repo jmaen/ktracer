@@ -6,11 +6,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
 import models.*
-import shading.Material
+import materials.Material
 
 @Serializable
 @SerialName("plane")
-open class Plane(private val point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
+class Plane(private val point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
     @Transient
     private val d = point dot normal
 

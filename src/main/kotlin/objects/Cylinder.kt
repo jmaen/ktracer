@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
 import models.*
-import shading.Material
+import materials.Material
 import util.*
 
 @Serializable

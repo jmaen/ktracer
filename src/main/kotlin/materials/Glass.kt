@@ -1,10 +1,14 @@
 package materials
 
-import models.Color
-import models.Hit
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
+import models.*
+
+@Serializable
+@SerialName("glass")
 class Glass : Material() {
-    override fun bsdf(hit: Hit): Color {
+    override fun bsdf(hit: Hit): Sample? {
         TODO("Not yet implemented")
     }
 }

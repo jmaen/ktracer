@@ -1,28 +1,42 @@
 package util
 
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlin.random.Random
 
 import models.Vector3
-import models.Color
 
-operator fun Int.times(other: Vector3): Vector3 {
-    return other * this
+fun randomInDisk(normal: Vector3, radius: Double): Vector3 {
+    // find two unit vectors perpendicular to the normal and to each other
+    val u = (normal cross Vector3(1, 1, 1)).normalized()
+    val v = (normal cross u).normalized()
+    val r = radius * sqrt(Random.nextDouble())
+    val theta = Random.nextDouble(2 * PI)
+    return u*r*sin(theta) + v*r*cos(theta)
 }
 
-operator fun Double.times(other: Vector3): Vector3 {
-    return other * this
+fun randomInXYDisk(radius: Double): Vector3 {
+    // special case for a disk on the XY-plane
+    val u = Vector3(1, 0, 0)
+    val v = Vector3(0, 1, 0)
+    val r = radius * sqrt(Random.nextDouble())
+    val theta = Random.nextDouble(2 * PI)
+    return u*r*sin(theta) + v*r*cos(theta)
 }
 
-operator fun Double.times(other: Color): Color {
-    return other * this
+
+fun randomInSphere(radius: Double): Vector3 {
+    while(true) {
+        val random = Vector3.random(-radius, radius)
+        if(random.length() > 1) {
+            continue
+        }
+        return random
+    }
 }
 
-fun Int.pow(n: Int): Double {
-    return this.toDouble().pow(n)
-}
-
-fun Double.clamp(lower: Double, upper: Double): Double {
-    return min(upper, max(lower, this))
+fun randomOnSphere(radius: Double): Vector3 {
+    return randomInSphere(radius).normalized()
 }

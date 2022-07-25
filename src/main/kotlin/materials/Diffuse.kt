@@ -1,10 +1,17 @@
 package materials
 
-import models.Color
-import models.Hit
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
+import models.*
+import util.randomInSphere
+
+@Serializable
+@SerialName("diffuse")
 class Diffuse(private val color: Color) : Material() {
-    override fun bsdf(hit: Hit): Color {
-        TODO("Not yet implemented")
+    override fun bsdf(hit: Hit): Sample? {
+        val direction = hit.normal + randomInSphere(1.0)
+
+        return Sample(Ray(hit.point, direction), color)
     }
 }

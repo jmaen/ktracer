@@ -4,24 +4,21 @@ import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.*
-import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 
 import models.*
-import lights.*
 import objects.*
 import util.*
 
 @Serializable
 class Scene(
     private val camera: Camera,
-    private val hittables: List<Hittable>,
-    private val lights: List<PositionalLight>,
-    private val globalLight: GlobalLight = GlobalLight(Color.WHITE, 0.2),
+    private val objects: List<Hittable>,
+    private val samplesPerRay: Int,
     private val voidColor: Color = Color.BLACK,
-    private val renderDistance: Double = 50.0,
+    private val renderDistance: Double = 100.0,
     private val maxDepth: Int = 5) {
 
     private val horizontalVector = Vector3(camera.canvasWidth, 0.0, 0.0)
@@ -47,10 +44,7 @@ class Scene(
                 }
 
                 for(y in image[0].indices) {
-                    var hitFound = false
-                    var red = 0.0
-                    var green = 0.0
-                    var blue = 0.0
+                    var color = Color.BLACK
                     val sf = camera.superSamplingFactor
                     for(i in 0 until sf) {
                         for(j in 0 until sf) {
@@ -58,7 +52,7 @@ class Scene(
                             val offsetX = i.toDouble() / sf
                             val offsetY = j.toDouble() / sf
 
-                            // calculate 3d point for pixel (nextDouble() < 1, so numerator is < x+1)
+                            // calculate 3d point for pixel
                             val horizontal = ((x.toDouble() + offsetX) / imageWidth)
                             val vertical = ((y.toDouble() + offsetY) / imageHeight)
                             val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
@@ -67,50 +61,27 @@ class Scene(
                             val direction = (point - camera.point).normalized()
                             val focalPoint = camera.point + camera.focalLength*direction
 
-                            // depth of field
-                            val lensRadius = camera.aperture / 2
-                            val u = horizontalVector.normalized()
-                            val v = verticalVector.normalized()
-                            var re = 0.0
-                            var gr = 0.0
-                            var bl = 0.0
-                            for(n in 0 until camera.samplesPerRay) {
+                            // calculate shading
+                            var sampleColor = Color.BLACK
+                            for(n in 0 until samplesPerRay) {
                                 // calculate random point on aperture disk
-                                val radius = lensRadius * sqrt(Random.nextDouble())
-                                val theta = Random.nextDouble(2 * PI)
-                                val offset = u*radius*sin(theta) + v*radius*cos(theta)
-                                val origin = camera.point + offset
+                                val origin = camera.point + randomInXYDisk(camera.aperture / 2)
 
-                                // determine the nearest hit (if any)
+                                // shade point
                                 val ray = Ray(origin, focalPoint - origin)
-                                val nearestHit = trace(ray)
-
-                                // if there is a hit, calculate shading
-                                if (nearestHit != null) {
-                                    hitFound = true
-                                    val (r, g, b) = shade(nearestHit)
-                                    re += r
-                                    gr += g
-                                    bl += b
-                                }
+                                sampleColor += shade(ray)
                             }
 
                             // take average of all samples
-                            red +=  re / camera.samplesPerRay
-                            green += gr / camera.samplesPerRay
-                            blue += bl / camera.samplesPerRay
+                            sampleColor /= samplesPerRay
+                            color += sampleColor
                         }
                     }
 
-                    // take average of all samples
-                    val samples = sf.pow(2)
-                    red /= samples
-                    green /= samples
-                    blue /= samples
+                    // take average of all samples (supersampling)
+                    color /= sf.pow(2)
 
-                    if(hitFound) {
-                        image[x][y] = Color(red, green, blue)
-                    }
+                    image[x][y] = color.clamp()
                 }
             }
         }
@@ -126,80 +97,40 @@ class Scene(
         return Image(image)
     }
 
+    private fun shade(ray: Ray, depth: Int = 0): Color {
+        // no contribution when max depth is exceeded
+        if(depth >= maxDepth) {
+            return Color.BLACK
+        }
+
+        // no hit returns the void color
+        val hit = trace(ray)
+        if(hit == null) {
+            return voidColor
+        }
+
+        // recursively add contributions
+        val emission = hit.material.emit(hit)
+        val sample = hit.material.bsdf(hit)
+        if(sample == null) {
+            return emission
+        } else {
+            val (shattered, color) = sample
+            return emission + color*shade(shattered, depth+1)
+        }
+    }
+
     private fun trace(ray: Ray): Hit? {
         // find the nearest object hit by the ray
         var nearestHit: Hit? = null
-        for(hittable in hittables) {
-            val hit = hittable.hit(ray, 0.0, renderDistance)
+        for(hittable in objects) {
+            val hit = hittable.hit(ray, 0.0001, renderDistance) // don't start at 0 to avoid shadow acne
             if(hit != null && (nearestHit == null || hit.t < nearestHit.t)) {
                 nearestHit = hit
             }
         }
 
         return nearestHit
-    }
-
-    private fun shade(hit: Hit, depth: Int = 0): Color {
-        val (ambientColor, diffuseColor, specularColor, shininess, reflectiveness) = hit.material
-        // use ambient colors to account for environment light
-        var color = ambientColor * globalLight.color * globalLight.intensity
-
-        for (light in lights) {
-            val points = light.getPoints()
-            var red = 0.0
-            var green = 0.0
-            var blue = 0.0
-            for(point in points) {
-                val lightDirection = point - hit.point
-
-                // check if hittable is between intersection and light source
-                val ray = Ray(hit.point + hit.normal*0.0001, lightDirection)  // add offset to hit so it does not hit itself
-                var isShadowed = false
-                for (hittable in hittables) {
-                    if(hittable.hit(ray, 0.0, lightDirection.length()) != null) {  // only search for hittables in light distance
-                        isShadowed = true
-                        break
-                    }
-                }
-
-                if(!isShadowed) {
-                    // calculate light with respect to light falloff
-                    val illumination = light.color * (light.intensity / (lightDirection.length()*lightDirection.length()))
-
-                    // lambertian shading
-                    val diffuse = diffuseColor * illumination * max(0.0, hit.normal dot lightDirection.normalized())
-
-                    // specular shading (Blinn-Phong)
-                    val cameraDirection = -hit.ray.direction
-                    val bisector = (lightDirection.normalized() + cameraDirection).normalized()
-                    val specular = specularColor * illumination * max(0.0, hit.normal dot bisector).pow(shininess)
-
-                    val (r, g, b) = diffuse + specular
-                    red += r
-                    green += g
-                    blue += b
-                }
-            }
-
-            // take average of samples
-            red /= points.size
-            green /= points.size
-            blue /= points.size
-            color += Color(red, green, blue)
-        }
-
-        // recursively calculate reflection
-        if(depth < maxDepth && reflectiveness != 0.0) {
-            var reflection = voidColor
-            val reflected = hit.ray.direction.reflected(hit.normal)
-            val reflectedHit = trace(Ray(hit.point + hit.normal*0.0001, reflected))
-            if(reflectedHit != null) {
-                reflection = shade(reflectedHit, depth + 1)
-            }
-            color += reflection * reflectiveness
-        }
-
-        return color
     }
 
     fun save(path: String) {

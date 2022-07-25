@@ -1,9 +1,12 @@
 package materials
 
+import kotlinx.serialization.Serializable
+
 import models.*
 
-abstract class Material {
-    abstract fun bsdf(hit: Hit): Color
+@Serializable
+sealed class Material {
+    abstract fun bsdf(hit: Hit): Sample?
 
     open fun emit(hit: Hit): Color {
         return Color.BLACK
