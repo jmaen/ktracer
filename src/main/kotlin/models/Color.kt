@@ -62,5 +62,13 @@ data class Color(var red: Double, var green: Double, var blue: Double) {
     companion object {
         val BLACK = Color(0.0, 0.0, 0.0)
         val WHITE = Color(1.0, 1.0, 1.0)
+
+        fun fromRGB(rgb: Int): Color {
+            val mask = 0xFF
+            val blue = rgb and mask
+            val green = (rgb shr 8) and mask
+            val red = (rgb shr 16) and mask
+            return Color(red, green, blue)
+        }
     }
 }
