@@ -1,5 +1,7 @@
 package models
 
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlinx.serialization.Serializable
 
@@ -67,11 +69,34 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
         return this - 2*(this dot normal)*normal
     }
 
+    fun rotateX(theta: Double): Vector3 {
+        val rotatedX = x
+        val rotatedY = y*cos(theta) - z*sin(theta)
+        val rotatedZ = y*sin(theta) + z*cos(theta)
+        return Vector3(rotatedX, rotatedY, rotatedZ)
+    }
+
+    fun rotateY(theta: Double): Vector3 {
+        val rotatedX = x*cos(theta) + z*sin(theta)
+        val rotatedY = y
+        val rotatedZ = -x*sin(theta) + z*cos(theta)
+        return Vector3(rotatedX, rotatedY, rotatedZ)
+    }
+
+    fun rotateZ(theta: Double): Vector3 {
+        val rotatedX = x*cos(theta) - y*sin(theta)
+        val rotatedY = x*sin(theta) + y*cos(theta)
+        val rotatedZ = z
+        return Vector3(rotatedX, rotatedY, rotatedZ)
+    }
+
     override fun toString(): String {
         return "($x, $y, $z)"
     }
 
     companion object {
+        val ZERO = Vector3(0, 0, 0)
+
         fun random(min: Double, max: Double): Vector3 {
             return Vector3(Random.nextDouble(min, max), Random.nextDouble(min, max), Random.nextDouble(min, max))
         }

@@ -9,7 +9,7 @@ import materials.Material
 
 @Serializable
 @SerialName("disk")
-class Disk(private val center: Vector3, private val normal: Vector3, private val radius: Double, private val material: Material) : Hittable {
+class Disk(private val center: Vector3, private val normal: Vector3, private val radius: Double, private val material: Material) : Transformable {
     @Transient
     private val plane: Plane = Plane(center, normal, material)
 
@@ -34,5 +34,22 @@ class Disk(private val center: Vector3, private val normal: Vector3, private val
         // check if point is inside the circle
         val distance = (point - center).length()
         return (distance <= radius)
+    }
+
+    override fun translate(translate: Vector3): Transformable {
+        return Disk(center + translate, normal, radius, material)
+    }
+
+    override fun rotate(rotate: Rotation3): Transformable {
+        var rotated = normal.rotateX(rotate.x)
+        rotated = rotated.rotateZ(rotate.z)
+        rotated = rotated.rotateY(rotate.y)
+
+        println(rotated)
+        return Disk(center, rotated, radius, material)
+    }
+
+    override fun scale(scale: Double): Transformable {
+        return Disk(center, normal, radius * scale, material)
     }
 }

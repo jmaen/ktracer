@@ -9,7 +9,7 @@ import materials.Material
 
 @Serializable
 @SerialName("polygon")
-class Polygon(private vararg val vertices: Vector3, private val material: Material) : Hittable {
+class Polygon(vararg val vertices: Vector3, private val material: Material) : Hittable {
     @Transient
     private lateinit var triangles: List<Triangle>
     @Transient

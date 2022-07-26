@@ -10,7 +10,7 @@ import util.*
 
 @Serializable
 @SerialName("sphere")
-class Sphere(private val center: Vector3, private val radius: Double, private val material: Material) : Hittable {
+class Sphere(private val center: Vector3, private val radius: Double, private val material: Material) : Transformable {
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val co = ray.origin - center
         val d = ray.direction
@@ -45,5 +45,17 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
     override fun checkPoint(point: Vector3): Boolean {
         val distance = (point - center).length()
         return (distance == radius)
+    }
+
+    override fun translate(translate: Vector3): Transformable {
+        return Sphere(center + translate, radius, material)
+    }
+
+    override fun rotate(rotate: Rotation3): Transformable {
+        return this
+    }
+
+    override fun scale(scale: Double): Transformable {
+        return Sphere(center, radius * scale, material)
     }
 }

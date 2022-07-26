@@ -9,7 +9,7 @@ import materials.Material
 
 @Serializable
 @SerialName("box")
-class Box(private val corner1: Vector3, private val corner2: Vector3, private val material: Material) : Hittable {
+class Box(private val corner1: Vector3, private val corner2: Vector3, private val material: Material) : Transformable {
     @Transient
     private lateinit var faces: List<Polygon>
 
@@ -82,5 +82,41 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         }
 
         return polygonList
+    }
+
+    override fun translate(translate: Vector3): Transformable {
+        return Box(corner1 + translate, corner2 + translate, material)
+    }
+
+    override fun rotate(rotate: Rotation3): Transformable {
+        val center = corner1 + (corner2 - corner1) / 2
+
+        var polygonList = mutableListOf<Polygon>()
+        var vertexList = mutableListOf<Vector3>()
+        var currentVertex: Vector3
+        for(face in faces) {
+            for(vertex in face.vertices) {
+                currentVertex = vertex
+                currentVertex -= center
+                currentVertex = currentVertex.rotateX(rotate.x)
+                currentVertex = currentVertex.rotateY(rotate.y)
+                currentVertex = currentVertex.rotateZ(rotate.z)
+                currentVertex += center
+
+                vertexList.add(currentVertex)
+            }
+            polygonList.add(Polygon(*vertexList.toTypedArray(), material = material))
+            vertexList.clear()
+        }
+        faces = polygonList
+
+        return this
+    }
+
+    override fun scale(scale: Double): Transformable {
+        val center = corner1 + (corner2 - corner1) / 2
+        val scaledCorner1 = center + (corner1 - center) * scale
+        val scaledCorner2 = center + (corner2 - center) * scale
+        return Box(scaledCorner1, scaledCorner2, material)
     }
 }
