@@ -19,17 +19,17 @@ class Scene(
     private val samplesPerRay: Int,
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0,
-    private val maxDepth: Int = 5) {
+    private val maxBounces: Int = 10) {
 
     private val horizontalVector = Vector3(camera.canvasWidth, 0.0, 0.0)
     private val verticalVector = Vector3(0.0, camera.canvasHeight, 0.0)
 
     fun render(): Image {
-        // compute image dimensions, initialize image array with background color
+        // compute image dimensions, initialize image array
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val onePercent = round(imageWidth / 100.0).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
-        val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { voidColor } }
+        val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
         val millis = measureTimeMillis {
             for(x in image.indices) {
@@ -97,9 +97,9 @@ class Scene(
         return Image(image)
     }
 
-    private fun shade(ray: Ray, depth: Int = 0): Color {
+    private fun shade(ray: Ray, bounces: Int = 0): Color {
         // no contribution when max depth is exceeded
-        if(depth >= maxDepth) {
+        if(bounces >= maxBounces) {
             return Color.BLACK
         }
 
@@ -116,7 +116,7 @@ class Scene(
             return emission
         } else {
             val (shattered, color) = sample
-            return emission + color*shade(shattered, depth+1)
+            return emission + color*shade(shattered, bounces + 1)
         }
     }
 
