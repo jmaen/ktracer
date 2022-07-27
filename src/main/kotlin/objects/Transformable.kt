@@ -2,14 +2,17 @@ package objects
 
 import kotlinx.serialization.Serializable
 
-import models.Rotation3
 import models.Vector3
 
 @Serializable
 sealed interface Transformable : Hittable {
-    fun translate(translate: Vector3): Transformable
+    fun translate(offset: Vector3): Transformable
 
-    fun rotate(rotate: Rotation3): Transformable
+    fun scale(factor: Double): Transformable
 
-    fun scale(scale: Double): Transformable
+    fun rotateX(angle: Double): Transformable
+
+    fun rotateY(angle: Double): Transformable
+
+    fun rotateZ(angle: Double): Transformable
 }

@@ -84,13 +84,34 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         return polygonList
     }
 
-    override fun translate(translate: Vector3): Transformable {
-        return Box(corner1 + translate, corner2 + translate, material)
+    override fun translate(offset: Vector3): Transformable {
+        return Box(corner1 + offset, corner2 + offset, material)
     }
 
-    override fun rotate(rotate: Rotation3): Transformable {
+    override fun scale(factor: Double): Transformable {
+        val center = corner1 + (corner2 - corner1)/2
+        val scaledCorner1 = center + (corner1 - center)*factor
+        val scaledCorner2 = center + (corner2 - center)*factor
+        return Box(scaledCorner1, scaledCorner2, material)
+    }
+
+    override fun rotateX(angle: Double): Transformable {
+        return rotate(Vector3::rotateX, angle)
+    }
+
+    override fun rotateY(angle: Double): Transformable {
+        return rotate(Vector3::rotateY, angle)
+    }
+
+    override fun rotateZ(angle: Double): Transformable {
+        return rotate(Vector3::rotateZ, angle)
+    }
+
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+        // offset to rotate around origin
         val center = corner1 + (corner2 - corner1) / 2
 
+        // rotate all vertices, create new corresponding polygons
         var polygonList = mutableListOf<Polygon>()
         var vertexList = mutableListOf<Vector3>()
         var currentVertex: Vector3
@@ -98,9 +119,7 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
             for(vertex in face.vertices) {
                 currentVertex = vertex
                 currentVertex -= center
-                currentVertex = currentVertex.rotateX(rotate.x)
-                currentVertex = currentVertex.rotateY(rotate.y)
-                currentVertex = currentVertex.rotateZ(rotate.z)
+                currentVertex = currentVertex.function(angle)
                 currentVertex += center
 
                 vertexList.add(currentVertex)
@@ -111,12 +130,5 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         faces = polygonList
 
         return this
-    }
-
-    override fun scale(scale: Double): Transformable {
-        val center = corner1 + (corner2 - corner1) / 2
-        val scaledCorner1 = center + (corner1 - center) * scale
-        val scaledCorner2 = center + (corner2 - center) * scale
-        return Box(scaledCorner1, scaledCorner2, material)
     }
 }

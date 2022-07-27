@@ -8,6 +8,7 @@ import kotlinx.serialization.Transient
 import models.*
 import materials.Material
 import util.*
+import kotlin.math.abs
 
 @Serializable
 @SerialName("cylinder")
@@ -102,7 +103,8 @@ class Cylinder(private val center1: Vector3, private val center2: Vector3, priva
         // check cylinder
         val closestPoint = getClosestPointOnAxis(point)
         val distance = (closestPoint - point).length()
-        return distance == radius
+        val difference = distance - radius
+        return abs(difference) < 0.0001
     }
 
     private fun getClosestPointOnAxis(point: Vector3): Vector3 {

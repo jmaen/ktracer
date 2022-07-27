@@ -39,6 +39,7 @@ class Plane(private val point: Vector3, private val normal: Vector3, private val
     }
 
     override fun checkPoint(point: Vector3): Boolean {
-        return (point dot normal == d)
+        val difference = (point dot normal) - d
+        return abs(difference) < 0.0001
     }
 }
