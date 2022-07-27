@@ -10,5 +10,7 @@ It currently supports:
 - JSON serialization for scene creation
 
 ## Example renders
-![8_gamma1](https://user-images.githubusercontent.com/47495425/181196535-02636df5-d913-4893-9cff-59aea2e430f1.png)
-<p align="center">(1000x1000, 2000 samples, 10 max bounces)</p>
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/47495425/181196535-02636df5-d913-4893-9cff-59aea2e430f1.png" width=500/><br>
+  (1000x1000, 2000 samples, 10 max bounces)
+</p>
