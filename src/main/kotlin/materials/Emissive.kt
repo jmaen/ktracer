@@ -7,12 +7,16 @@ import models.*
 
 @Serializable
 @SerialName("emissive")
-class Emissive(private val color: Color, private val strength: Double) : Material() {
-    override fun bsdf(hit: Hit): Sample? {
-        return null
+class Emissive(private val color: Color, private val intensity: Double) : Material() {
+    init {
+        if(intensity < 0) {
+            throw IllegalArgumentException("Intensity has to be >= 0.")
+        }
     }
 
+    override fun bsdf(hit: Hit): Sample? = null
+
     override fun emit(hit: Hit): Color {
-        return color * strength
+        return color * intensity
     }
 }

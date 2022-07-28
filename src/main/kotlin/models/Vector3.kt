@@ -96,6 +96,7 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
 
     companion object {
         val ZERO = Vector3(0, 0, 0)
+        val ONE = Vector3(1, 1, 1)
 
         fun random(min: Double, max: Double): Vector3 {
             return Vector3(Random.nextDouble(min, max), Random.nextDouble(min, max), Random.nextDouble(min, max))

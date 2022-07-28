@@ -3,37 +3,41 @@ package objects
 import kotlin.math.PI
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Transient
 
-import models.Hit
-import models.Ray
-import models.Vector3
+import models.*
 
 @Serializable
 @SerialName("transform")
 class Transform(
-    private val transformable: Transformable,
-    private val translate: Vector3 = Vector3.ZERO,
-    private val rotateX: Double = 0.0,
-    private val rotateY: Double = 0.0,
-    private val rotateZ: Double = 0.0,
-    private val scale: Double = 1.0) : Hittable {
-    @Transient
-    private lateinit var transformed: Transformable
+    private var transformable: Transformable,
+    private val translate: Vector3? = null,
+    private val rotate: Rotation? = null,
+    private val scale: Double? = null) : Hittable {
 
     init {
-        transformed = transformable.translate(translate)
-        transformed = transformed.scale(scale)
-        transformed = transformed.rotateX(rotateX * (PI / 180))
-        transformed = transformed.rotateY(rotateY * (PI / 180))
-        transformed = transformed.rotateZ(rotateZ * (PI / 180))
+        if(translate != null) {
+            transformable = transformable.translate(translate)
+        }
+        if(scale != null) {
+            transformable = transformable.scale(scale)
+        }
+        if(rotate != null) {
+            var (axis, angle) = rotate
+            angle *= PI / 180
+            transformable = when(axis) {
+                "x" -> transformable.rotateX(angle)
+                "y" -> transformable.rotateY(angle)
+                "z" -> transformable.rotateZ(angle)
+                else -> throw IllegalStateException()
+            }
+        }
     }
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
-        return transformed.hit(ray, tMin, tMax)
+        return transformable.hit(ray, tMin, tMax)
     }
 
     override fun checkPoint(point: Vector3): Boolean {
-        return transformed.checkPoint(point)
+        return transformable.checkPoint(point)
     }
 }

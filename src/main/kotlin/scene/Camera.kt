@@ -22,5 +22,11 @@ data class Camera(
         if(canvasOrigin.z != 0.0) {
             throw IllegalArgumentException("Canvas' z value has to be 0.")
         }
+        if(pixelsPerUnit < 1) {
+            throw IllegalArgumentException("There has to be at least one pixel per unit.")
+        }
+        if(superSamplingFactor < 1) {
+            throw IllegalArgumentException("Supersampling factor has to be >= 1.")
+        }
     }
 }

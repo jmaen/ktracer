@@ -17,19 +17,27 @@ class Scene(
     private val camera: Camera,
     private val objects: List<Hittable>,
     private val samplesPerRay: Int,
+    private val maxBounces: Int,
     private val voidColor: Color = Color.BLACK,
-    private val renderDistance: Double = 100.0,
-    private val maxDepth: Int = 5) {
-
+    private val renderDistance: Double = 100.0) {
     private val horizontalVector = Vector3(camera.canvasWidth, 0.0, 0.0)
     private val verticalVector = Vector3(0.0, camera.canvasHeight, 0.0)
 
+    init {
+        if(samplesPerRay < 1) {
+            throw IllegalArgumentException("There has to be at least one sample per ray.")
+        }
+        if(maxBounces < 1) {
+            throw IllegalArgumentException("There has to be at least one bounce.")
+        }
+    }
+
     fun render(): Image {
-        // compute image dimensions, initialize image array with background color
+        // compute image dimensions, initialize image array
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val onePercent = round(imageWidth / 100.0).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
-        val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { voidColor } }
+        val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
         val millis = measureTimeMillis {
             for(x in image.indices) {
@@ -97,9 +105,9 @@ class Scene(
         return Image(image)
     }
 
-    private fun shade(ray: Ray, depth: Int = 0): Color {
+    private fun shade(ray: Ray, bounces: Int = 0): Color {
         // no contribution when max depth is exceeded
-        if(depth >= maxDepth) {
+        if(bounces >= maxBounces) {
             return Color.BLACK
         }
 
@@ -116,7 +124,7 @@ class Scene(
             return emission
         } else {
             val (shattered, color) = sample
-            return emission + color*shade(shattered, depth+1)
+            return emission + color*shade(shattered, bounces + 1)
         }
     }
 
