@@ -1,10 +1,11 @@
 package models
 
 import util.*
+import java.util.concurrent.atomic.AtomicLong
 
 data class Ray(val origin: Vector3, var direction: Vector3) {
     init {
-        instanceCount++
+        instanceCount.incrementAndGet()
         direction = direction.normalized()
     }
 
@@ -13,6 +14,6 @@ data class Ray(val origin: Vector3, var direction: Vector3) {
     }
 
     companion object {
-        var instanceCount: Long = 0
+        var instanceCount = AtomicLong(0)
     }
 }
