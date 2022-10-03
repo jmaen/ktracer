@@ -3,6 +3,7 @@ package scene
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.*
 import kotlin.system.measureTimeMillis
 import kotlinx.serialization.*
@@ -12,13 +13,13 @@ import kotlinx.coroutines.*
 import models.*
 import objects.*
 import util.*
-import java.util.concurrent.atomic.AtomicInteger
 
 @Serializable
 class Scene(
     private val camera: Camera,
     private val objects: List<Hittable>,
     private val samples: Int,
+    private val ssaaFactor: Int,
     private val maxBounces: Int,
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0) {
@@ -34,6 +35,9 @@ class Scene(
         if(maxBounces < 1) {
             throw IllegalArgumentException("There has to be at least one bounce.")
         }
+        if(ssaaFactor < 1) {
+            throw IllegalArgumentException("Supersampling factor has to be >= 1.")
+        }
     }
 
     suspend fun render(threads: Int = Runtime.getRuntime().availableProcessors()): Image {
@@ -42,7 +46,10 @@ class Scene(
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
         val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
-        val summary = mutableMapOf("samples" to samples.toString(), "maxBounces" to maxBounces.toString())
+        val summary = mutableMapOf(
+            "samples" to samples.toString(),
+            "ssaaFactor" to ssaaFactor.toString(),
+            "maxBounces" to maxBounces.toString())
         coroutineScope {
             val millis = measureTimeMillis {
                 // render parts asynchronously
@@ -97,12 +104,11 @@ class Scene(
 
             for(y in 0 until imageHeight) {
                 var color = Color.BLACK
-                val sf = camera.superSamplingFactor
-                for(i in 0 until sf) {
-                    for(j in 0 until sf) {
+                for(i in 0 until ssaaFactor) {
+                    for(j in 0 until ssaaFactor) {
                         // calculate offsets for supersampling
-                        val offsetX = i.toDouble() / sf
-                        val offsetY = j.toDouble() / sf
+                        val offsetX = i.toDouble() / ssaaFactor
+                        val offsetY = j.toDouble() / ssaaFactor
 
                         // calculate 3d point for pixel
                         val horizontal = ((x.toDouble() + offsetX) / imageWidth)
@@ -131,7 +137,7 @@ class Scene(
                 }
 
                 // take average of all samples (supersampling)
-                color /= sf * sf
+                color /= ssaaFactor * ssaaFactor
 
                 part[x - from][y] = color.clamp()
             }

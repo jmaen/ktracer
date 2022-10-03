@@ -11,7 +11,6 @@ data class Camera(
     val canvasWidth: Double,
     val canvasHeight: Double,
     val pixelsPerUnit: Int,
-    val superSamplingFactor: Int,
     val focalLength: Double,
     val aperture: Double
     ) {
@@ -24,9 +23,6 @@ data class Camera(
         }
         if(pixelsPerUnit < 1) {
             throw IllegalArgumentException("There has to be at least one pixel per unit.")
-        }
-        if(superSamplingFactor < 1) {
-            throw IllegalArgumentException("Supersampling factor has to be >= 1.")
         }
     }
 }

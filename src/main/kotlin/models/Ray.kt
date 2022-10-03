@@ -1,7 +1,8 @@
 package models
 
-import util.*
 import java.util.concurrent.atomic.AtomicLong
+
+import util.*
 
 data class Ray(val origin: Vector3, var direction: Vector3) {
     init {
