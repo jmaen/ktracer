@@ -7,7 +7,8 @@ It currently supports:
 - Multiple materials (diffuse, metal and emissive)
 - Anti-aliasing (SSAA) 
 - Depth of field
-- JSON serialization for scene creation
+- Multithreading
+- JSON serialization to save and load scenes
 
 ## Example renders
 <p align="center">
