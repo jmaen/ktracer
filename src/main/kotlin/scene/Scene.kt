@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class Scene(
     private val camera: Camera,
     private val objects: List<Hittable>,
-    private val samplesPerRay: Int,
+    private val samples: Int,
     private val maxBounces: Int,
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0) {
@@ -28,7 +28,7 @@ class Scene(
     private val renderedColumns = AtomicInteger(0)
 
     init {
-        if(samplesPerRay < 1) {
+        if(samples < 1) {
             throw IllegalArgumentException("There has to be at least one sample per ray.")
         }
         if(maxBounces < 1) {
@@ -40,8 +40,9 @@ class Scene(
         // compute image dimensions, initialize image array
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
-        var image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
+        val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
+        val summary = mutableMapOf("samples" to samples.toString(), "maxBounces" to maxBounces.toString())
         coroutineScope {
             val millis = measureTimeMillis {
                 // render parts asynchronously
@@ -59,17 +60,21 @@ class Scene(
                 }
             }
 
-            println("Rendering: [====================] (100%)")
             // print summary
             val rays = String.format(Locale.US, "%,d", Ray.instanceCount.toLong())
+            summary["rays"] = rays
+
             val hours = TimeUnit.MILLISECONDS.toHours(millis)
             val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(hours)
             val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(minutes)
-            val time = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-            println("Finished rendering! Spawned $rays rays in $time.")
+            val renderTime = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            summary["renderTime"] = renderTime
+
+            println("Rendering: [====================] (100%)")
+            println("Finished rendering! Spawned $rays rays in $renderTime.")
         }
 
-        return Image(image)
+        return Image(image, summary)
     }
 
     private fun renderPart(from: Int, to: Int, imageWidth: Int, imageHeight: Int): Array<Array<Color>> {
@@ -80,15 +85,14 @@ class Scene(
 
         // render part
         for(x in from until to) {
-            // TODO status bar
             val count = renderedColumns.incrementAndGet()
             if(count % onePercent == 0) {
                 print("Rendering: [")
                 for(i in 0..19) {
-                    val c = if(x >= i * onePercent * 5) '=' else ' '
+                    val c = if(count >= i * onePercent * 5) '=' else ' '
                     print(c)
                 }
-                print("] (${round(x.toDouble() / imageWidth * 100)}%)\r")
+                print("] (${round(count.toDouble() / imageWidth * 100)}%)\r")
             }
 
             for(y in 0 until imageHeight) {
@@ -111,7 +115,7 @@ class Scene(
 
                         // calculate shading
                         var sampleColor = Color.BLACK
-                        for(n in 0 until samplesPerRay) {
+                        for(n in 0 until samples) {
                             // calculate random point on aperture disk
                             val origin = camera.point + randomInXYDisk(camera.aperture / 2)
 
@@ -121,7 +125,7 @@ class Scene(
                         }
 
                         // take average of all samples
-                        sampleColor /= samplesPerRay
+                        sampleColor /= samples
                         color += sampleColor
                     }
                 }
