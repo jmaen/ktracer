@@ -7,24 +7,28 @@ import kotlin.math.*
 import kotlin.system.measureTimeMillis
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import kotlinx.coroutines.*
 
 import models.*
 import objects.*
 import util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 @Serializable
 class Scene(
     private val camera: Camera,
     private val objects: List<Hittable>,
-    private val samplesPerRay: Int,
+    private val samples: Int,
     private val maxBounces: Int,
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0) {
     private val horizontalVector = Vector3(camera.canvasWidth, 0.0, 0.0)
     private val verticalVector = Vector3(0.0, camera.canvasHeight, 0.0)
+    @Transient
+    private val renderedColumns = AtomicInteger(0)
 
     init {
-        if(samplesPerRay < 1) {
+        if(samples < 1) {
             throw IllegalArgumentException("There has to be at least one sample per ray.")
         }
         if(maxBounces < 1) {
@@ -32,77 +36,108 @@ class Scene(
         }
     }
 
-    fun render(): Image {
+    suspend fun render(threads: Int = Runtime.getRuntime().availableProcessors()): Image {
         // compute image dimensions, initialize image array
         val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
-        val onePercent = round(imageWidth / 100.0).toInt()
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
         val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
-        val millis = measureTimeMillis {
-            for(x in image.indices) {
-                // status bar
-                if(x % onePercent == 0) {
-                    print("Rendering: [")
-                    for(i in 0..19) {
-                        val c = if(x >= i * onePercent * 5) '=' else ' '
-                        print(c)
-                    }
-                    print("] (${round(x.toDouble() / imageWidth * 100)}%)\r")
+        val summary = mutableMapOf("samples" to samples.toString(), "maxBounces" to maxBounces.toString())
+        coroutineScope {
+            val millis = measureTimeMillis {
+                // render parts asynchronously
+                val partList = mutableListOf<Deferred<Array<Array<Color>>>>()
+                val partSize = imageWidth / threads
+                for(i in 0 until threads - 1) {
+                    partList.add(async { renderPart(i * partSize, (i + 1) * partSize, imageWidth, imageHeight) })
                 }
+                partList.add(async { renderPart((threads - 1) * partSize, imageWidth, imageWidth, imageHeight) })
 
-                for(y in image[0].indices) {
-                    var color = Color.BLACK
-                    val sf = camera.superSamplingFactor
-                    for(i in 0 until sf) {
-                        for(j in 0 until sf) {
-                            // calculate offsets for supersampling
-                            val offsetX = i.toDouble() / sf
-                            val offsetY = j.toDouble() / sf
-
-                            // calculate 3d point for pixel
-                            val horizontal = ((x.toDouble() + offsetX) / imageWidth)
-                            val vertical = ((y.toDouble() + offsetY) / imageHeight)
-                            val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
-
-                            // calculate focal point
-                            val direction = (point - camera.point).normalized()
-                            val focalPoint = camera.point + camera.focalLength*direction
-
-                            // calculate shading
-                            var sampleColor = Color.BLACK
-                            for(n in 0 until samplesPerRay) {
-                                // calculate random point on aperture disk
-                                val origin = camera.point + randomInXYDisk(camera.aperture / 2)
-
-                                // shade point
-                                val ray = Ray(origin, focalPoint - origin)
-                                sampleColor += shade(ray)
-                            }
-
-                            // take average of all samples
-                            sampleColor /= samplesPerRay
-                            color += sampleColor
-                        }
-                    }
-
-                    // take average of all samples (supersampling)
-                    color /= sf.pow(2)
-
-                    image[x][y] = color.clamp()
+                // wait for all parts, copy parts into final image
+                val parts = awaitAll(*partList.toTypedArray()).toTypedArray()
+                for(i in 0 until threads) {
+                    parts[i].copyInto(image, i * partSize)
                 }
             }
-        }
-        println("Rendering: [====================] (100%)")
-        // print summary
-        val rays = String.format(Locale.US, "%,d", Ray.instanceCount)
-        val hours = TimeUnit.MILLISECONDS.toHours(millis)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(hours)
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(minutes)
-        val time = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        println("Finished rendering! Spawned $rays rays in $time.")
 
-        return Image(image)
+            // print summary
+            val rays = String.format(Locale.US, "%,d", Ray.instanceCount.toLong())
+            summary["rays"] = rays
+
+            val hours = TimeUnit.MILLISECONDS.toHours(millis)
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(hours)
+            val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(minutes)
+            val renderTime = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            summary["renderTime"] = renderTime
+
+            println("Rendering: [====================] (100%)")
+            println("Finished rendering! Spawned $rays rays in $renderTime.")
+        }
+
+        return Image(image, summary)
+    }
+
+    private fun renderPart(from: Int, to: Int, imageWidth: Int, imageHeight: Int): Array<Array<Color>> {
+        val onePercent = round(imageWidth / 100.0).toInt()
+
+        // initialize array
+        val part = Array(to - from) { Array(imageHeight) { Color.BLACK } }
+
+        // render part
+        for(x in from until to) {
+            val count = renderedColumns.incrementAndGet()
+            if(count % onePercent == 0) {
+                print("Rendering: [")
+                for(i in 0..19) {
+                    val c = if(count >= i * onePercent * 5) '=' else ' '
+                    print(c)
+                }
+                print("] (${round(count.toDouble() / imageWidth * 100)}%)\r")
+            }
+
+            for(y in 0 until imageHeight) {
+                var color = Color.BLACK
+                val sf = camera.superSamplingFactor
+                for(i in 0 until sf) {
+                    for(j in 0 until sf) {
+                        // calculate offsets for supersampling
+                        val offsetX = i.toDouble() / sf
+                        val offsetY = j.toDouble() / sf
+
+                        // calculate 3d point for pixel
+                        val horizontal = ((x.toDouble() + offsetX) / imageWidth)
+                        val vertical = ((y.toDouble() + offsetY) / imageHeight)
+                        val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
+
+                        // calculate focal point
+                        val direction = (point - camera.point).normalized()
+                        val focalPoint = camera.point + camera.focalLength*direction
+
+                        // calculate shading
+                        var sampleColor = Color.BLACK
+                        for(n in 0 until samples) {
+                            // calculate random point on aperture disk
+                            val origin = camera.point + randomInXYDisk(camera.aperture / 2)
+
+                            // shade point
+                            val ray = Ray(origin, focalPoint - origin)
+                            sampleColor += shade(ray)
+                        }
+
+                        // take average of all samples
+                        sampleColor /= samples
+                        color += sampleColor
+                    }
+                }
+
+                // take average of all samples (supersampling)
+                color /= sf * sf
+
+                part[x - from][y] = color.clamp()
+            }
+        }
+
+        return part
     }
 
     private fun shade(ray: Ray, bounces: Int = 0): Color {
@@ -123,8 +158,8 @@ class Scene(
         if(sample == null) {
             return emission
         } else {
-            val (shattered, color) = sample
-            return emission + color*shade(shattered, bounces + 1)
+            val (scattered, color) = sample
+            return emission + color*shade(scattered, bounces + 1)
         }
     }
 
