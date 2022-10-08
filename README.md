@@ -8,12 +8,12 @@ It currently supports:
 - Anti-aliasing (SSAA) 
 - Depth of field
 - Multithreading
-- JSON serialization to save and load scenes
+- JSON serialization for scene saving/loading
 
 ## Example renders
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/47495425/181196535-02636df5-d913-4893-9cff-59aea2e430f1.png" width=500/><br>
-  (1000x1000, 2000 samples, 10 max bounces)
+  <img src="https://user-images.githubusercontent.com/47495425/194720715-76b2a69c-6837-4b87-abb4-af4525eae11f.png" width=500/><br>
+  (1000x1000, 2000 samples, 2x supersampling, 10 max bounces)
 </p>
 
 ## About
