@@ -1,11 +1,9 @@
 package models
 
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 import kotlinx.serialization.Serializable
 
 import util.*
+import kotlin.math.*
 import kotlin.random.Random
 
 @Serializable
@@ -65,8 +63,22 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
         return this / length()
     }
 
-    fun reflected(normal: Vector3): Vector3 {
+    fun enters(normal: Vector3): Boolean {
+        return this dot normal < 0
+    }
+
+    fun reflect(normal: Vector3): Vector3 {
         return this - 2*(this dot normal)*normal
+    }
+
+    fun refract(normal: Vector3, refractionRatio: Double): Vector3? {
+        val dt = this dot normal
+        val discriminant = 1 - refractionRatio*refractionRatio * (1 - dt*dt)
+        if(discriminant > 0) {
+            return refractionRatio*(this - dt*normal) - sqrt(discriminant)*normal
+        } else {
+            return null
+        }
     }
 
     fun rotateX(theta: Double): Vector3 {
@@ -97,6 +109,9 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
     companion object {
         val ZERO = Vector3(0, 0, 0)
         val ONE = Vector3(1, 1, 1)
+        val UNIT_X = Vector3(1, 0, 0)
+        val UNIT_Y = Vector3(0, 1, 0)
+        val UNIT_Z = Vector3(0, 0, 1)
 
         fun random(min: Double, max: Double): Vector3 {
             return Vector3(Random.nextDouble(min, max), Random.nextDouble(min, max), Random.nextDouble(min, max))

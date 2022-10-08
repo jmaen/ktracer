@@ -48,8 +48,8 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
     }
 
     private fun calculateFaces(directions: List<Vector3>): List<Polygon> {
-        var polygonList = mutableListOf<Polygon>()
-        var vertexList = mutableListOf<Vector3>()
+        val polygonList = mutableListOf<Polygon>()
+        val vertexList = mutableListOf<Vector3>()
         var currentVertex: Vector3
 
         // calculate the 4 vertices per face and create corresponding polygon
@@ -112,8 +112,8 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         val center = corner1 + (corner2 - corner1) / 2
 
         // rotate all vertices, create new corresponding polygons
-        var polygonList = mutableListOf<Polygon>()
-        var vertexList = mutableListOf<Vector3>()
+        val polygonList = mutableListOf<Polygon>()
+        val vertexList = mutableListOf<Vector3>()
         var currentVertex: Vector3
         for(face in faces) {
             for(vertex in face.vertices) {

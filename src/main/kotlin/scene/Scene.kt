@@ -4,6 +4,7 @@ import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.fixedRateTimer
 import kotlin.math.*
 import kotlin.system.measureTimeMillis
 import kotlinx.serialization.*
@@ -23,10 +24,10 @@ class Scene(
     private val maxBounces: Int,
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0) {
-    private val horizontalVector = Vector3(camera.canvasWidth, 0.0, 0.0)
-    private val verticalVector = Vector3(0.0, camera.canvasHeight, 0.0)
     @Transient
     private val renderedColumns = AtomicInteger(0)
+    @Transient
+    private var print = false
 
     init {
         if(samples < 1) {
@@ -46,10 +47,17 @@ class Scene(
         val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
         val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
+        // store render parameters for image metadata
         val summary = mutableMapOf(
             "samples" to samples.toString(),
             "ssaaFactor" to ssaaFactor.toString(),
             "maxBounces" to maxBounces.toString())
+
+        // status bar timer
+        fixedRateTimer(daemon = true, period = 500) {
+            print = true
+        }
+
         coroutineScope {
             val millis = measureTimeMillis {
                 // render parts asynchronously
@@ -85,21 +93,16 @@ class Scene(
     }
 
     private fun renderPart(from: Int, to: Int, imageWidth: Int, imageHeight: Int): Array<Array<Color>> {
-        val onePercent = round(imageWidth / 100.0).toInt()
-
         // initialize array
         val part = Array(to - from) { Array(imageHeight) { Color.BLACK } }
 
         // render part
         for(x in from until to) {
+            // status bar
             val count = renderedColumns.incrementAndGet()
-            if(count % onePercent == 0) {
-                print("Rendering: [")
-                for(i in 0..19) {
-                    val c = if(count >= i * onePercent * 5) '=' else ' '
-                    print(c)
-                }
-                print("] (${round(count.toDouble() / imageWidth * 100)}%)\r")
+            if(print) {
+                print = false
+                printStatusBar(count.toDouble() / imageWidth * 100)
             }
 
             for(y in 0 until imageHeight) {
@@ -111,9 +114,9 @@ class Scene(
                         val offsetY = j.toDouble() / ssaaFactor
 
                         // calculate 3d point for pixel
-                        val horizontal = ((x.toDouble() + offsetX) / imageWidth)
-                        val vertical = ((y.toDouble() + offsetY) / imageHeight)
-                        val point = camera.canvasOrigin + horizontal*horizontalVector + vertical*verticalVector
+                        val horizontal = ((x.toDouble() + offsetX) / imageWidth) * camera.canvasWidth
+                        val vertical = ((y.toDouble() + offsetY) / imageHeight) * camera.canvasHeight
+                        val point = camera.canvasOrigin + horizontal*Vector3.UNIT_X + vertical*Vector3.UNIT_Y
 
                         // calculate focal point
                         val direction = (point - camera.point).normalized()
@@ -180,6 +183,15 @@ class Scene(
         }
 
         return nearestHit
+    }
+
+    private fun printStatusBar(percentage: Double) {
+        print("Rendering: [")
+        for(i in 1..20) {
+            val c = if(percentage >= i * 5) '=' else ' '
+            print(c)
+        }
+        print("] (${round(percentage * 100) / 100}%)\r")
     }
 
     fun save(path: String) {

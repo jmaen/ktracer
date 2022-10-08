@@ -36,12 +36,12 @@ class Disk(private val center: Vector3, private val normal: Vector3, private val
         return distance <= radius
     }
 
-    override fun translate(translate: Vector3): Transformable {
-        return Disk(center + translate, normal, radius, material)
+    override fun translate(offset: Vector3): Transformable {
+        return Disk(center + offset, normal, radius, material)
     }
 
-    override fun scale(scale: Double): Transformable {
-        return Disk(center, normal, radius * scale, material)
+    override fun scale(factor: Double): Transformable {
+        return Disk(center, normal, radius * factor, material)
     }
 
     override fun rotateX(angle: Double): Transformable {

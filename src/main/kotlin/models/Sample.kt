@@ -1,3 +1,3 @@
 package models
 
-data class Sample(val shattered: Ray, val color: Color)
+data class Sample(val scattered: Ray, val color: Color)
