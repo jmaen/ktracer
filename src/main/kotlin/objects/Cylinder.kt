@@ -12,7 +12,7 @@ import kotlin.math.abs
 
 @Serializable
 @SerialName("cylinder")
-class Cylinder(private val center1: Vector3, private val center2: Vector3, private val radius: Double, private val material: Material) : Hittable {
+class Cylinder(private val center1: Vector3, private val center2: Vector3, private val radius: Double, private val material: Material) : Transformable {
     @Transient
     private val disk1 = Disk(center1, center1 - center2, radius, material)
     @Transient
@@ -110,5 +110,45 @@ class Cylinder(private val center1: Vector3, private val center2: Vector3, priva
     private fun getClosestPointOnAxis(point: Vector3): Vector3 {
         val n = (center2 - center1).normalized()
         return center1 + ((point - center1) dot n)*n
+    }
+
+    override fun translate(offset: Vector3): Transformable {
+        return Cylinder(center1 + offset, center2 + offset, radius, material)
+    }
+
+    override fun scale(factor: Double): Transformable {
+        val center = center1 + (center2 - center1)/2
+        val scaledCenter1 = center + (center1 - center)*factor
+        val scaledCenter2 = center + (center2 - center)*factor
+
+        return Cylinder(scaledCenter1, scaledCenter2, radius * factor, material)
+    }
+
+    override fun rotateX(angle: Double): Transformable {
+        return rotate(Vector3::rotateX, angle)
+    }
+
+    override fun rotateY(angle: Double): Transformable {
+        return rotate(Vector3::rotateY, angle)
+    }
+
+    override fun rotateZ(angle: Double): Transformable {
+        return rotate(Vector3::rotateZ, angle)
+    }
+
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+        // offset to rotate around origin
+        val center = center1 + (center2 - center1)/2
+
+        // move disk centers so that cylinder center is at origin, rotate, move back
+        var rotatedCenter1 = center1 - center
+        rotatedCenter1 = rotatedCenter1.function(angle)
+        rotatedCenter1 += center
+
+        var rotatedCenter2 = center2 - center
+        rotatedCenter2 = rotatedCenter2.function(angle)
+        rotatedCenter2 += center
+
+        return Cylinder(rotatedCenter1, rotatedCenter2, radius, material)
     }
 }

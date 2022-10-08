@@ -92,6 +92,7 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         val center = corner1 + (corner2 - corner1)/2
         val scaledCorner1 = center + (corner1 - center)*factor
         val scaledCorner2 = center + (corner2 - center)*factor
+
         return Box(scaledCorner1, scaledCorner2, material)
     }
 
@@ -114,11 +115,10 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         // rotate all vertices, create new corresponding polygons
         val polygonList = mutableListOf<Polygon>()
         val vertexList = mutableListOf<Vector3>()
-        var currentVertex: Vector3
         for(face in faces) {
             for(vertex in face.vertices) {
-                currentVertex = vertex
-                currentVertex -= center
+                // move vertex so that center is at origin, rotate, move back
+                var currentVertex = vertex - center
                 currentVertex = currentVertex.function(angle)
                 currentVertex += center
 

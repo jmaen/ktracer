@@ -10,7 +10,7 @@ import materials.Material
 
 @Serializable
 @SerialName("plane")
-class Plane(private val point: Vector3, private val normal: Vector3, private val material: Material) : Hittable {
+class Plane(private val point: Vector3, private val normal: Vector3, private val material: Material) : Transformable {
     @Transient
     private val d = point dot normal
 
@@ -41,5 +41,23 @@ class Plane(private val point: Vector3, private val normal: Vector3, private val
     override fun checkPoint(point: Vector3): Boolean {
         val difference = (point dot normal) - d
         return abs(difference) < 0.0001
+    }
+
+    override fun translate(offset: Vector3): Transformable {
+        return Plane(point + offset, normal, material)
+    }
+
+    override fun scale(factor: Double): Transformable = this
+
+    override fun rotateX(angle: Double): Transformable {
+        return Plane(point, normal.rotateX(angle), material)
+    }
+
+    override fun rotateY(angle: Double): Transformable {
+        return Plane(point, normal.rotateY(angle), material)
+    }
+
+    override fun rotateZ(angle: Double): Transformable {
+        return Plane(point, normal.rotateZ(angle), material)
     }
 }

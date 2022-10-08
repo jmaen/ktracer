@@ -9,7 +9,7 @@ import materials.Material
 
 @Serializable
 @SerialName("polygon")
-class Polygon(vararg val vertices: Vector3, private val material: Material) : Hittable {
+class Polygon(vararg val vertices: Vector3, private val material: Material) : Transformable {
     @Transient
     private lateinit var triangles: List<Triangle>
     @Transient
@@ -96,5 +96,61 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Hi
         }
 
         return triangleList
+    }
+
+    override fun translate(offset: Vector3): Transformable {
+        val vertexList = mutableListOf<Vector3>()
+        for(vertex in vertices) {
+            vertexList.add(vertex + offset)
+        }
+
+        return Polygon(*vertexList.toTypedArray(), material = material)
+    }
+
+    override fun scale(factor: Double): Transformable {
+        var center = Vector3.ZERO
+        for(vertex in vertices) {
+            center += vertex
+        }
+        center /= vertices.size
+
+        val vertexList = mutableListOf<Vector3>()
+        for(vertex in vertices) {
+            vertexList.add(center + (vertex - center)*factor)
+        }
+
+        return Polygon(*vertexList.toTypedArray(), material = material)
+    }
+
+    override fun rotateX(angle: Double): Transformable {
+        return rotate(Vector3::rotateX, angle)
+    }
+
+    override fun rotateY(angle: Double): Transformable {
+        return rotate(Vector3::rotateY, angle)
+    }
+
+    override fun rotateZ(angle: Double): Transformable {
+        return rotate(Vector3::rotateZ, angle)
+    }
+
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+        // offset to rotate around origin
+        var center = Vector3.ZERO
+        for(vertex in vertices) {
+            center += vertex
+        }
+        center /= vertices.size
+
+        // move vertices so that center is at origin, rotate, move back
+        val vertexList = mutableListOf<Vector3>()
+        for(vertex in vertices) {
+            var rotatedVertex = vertex - center
+            rotatedVertex = rotatedVertex.function(angle)
+            rotatedVertex += center
+            vertexList.add(rotatedVertex)
+        }
+
+        return Polygon(*vertexList.toTypedArray(), material = material)
     }
 }
