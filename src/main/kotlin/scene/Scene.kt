@@ -176,7 +176,7 @@ class Scene(
         // find the nearest object hit by the ray
         var nearestHit: Hit? = null
         for(hittable in objects) {
-            val hit = hittable.hit(ray, 0.0001, renderDistance) // don't start at 0 to avoid shadow acne
+            val hit = hittable.hit(ray, 0.0001, renderDistance) // don't start at 0 to avoid self intersects
             if(hit != null && (nearestHit == null || hit.t < nearestHit.t)) {
                 nearestHit = hit
             }

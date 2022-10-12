@@ -8,7 +8,5 @@ import models.*
 sealed class Material {
     abstract fun bsdf(hit: Hit): Sample?
 
-    open fun emit(hit: Hit): Color {
-        return Color.BLACK
-    }
+    open fun emit(hit: Hit): Color = Color.BLACK
 }
