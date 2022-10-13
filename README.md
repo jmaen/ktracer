@@ -11,8 +11,9 @@ It currently supports:
 - JSON serialization for scene saving/loading
 
 ## Example renders
+
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/47495425/194720715-76b2a69c-6837-4b87-abb4-af4525eae11f.png" width=500/><br>
+  <img src="https://user-images.githubusercontent.com/47495425/195702771-0d21b65f-147f-4944-a9b3-7825fbf89d02.png" width=500/><br>
   (1000x1000, 2000 samples, 2x supersampling, 10 max bounces)
 </p>
 
