@@ -36,8 +36,4 @@ class Transform(
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         return transformable.hit(ray, tMin, tMax)
     }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        return transformable.checkPoint(point)
-    }
 }

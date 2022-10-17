@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
-import util.times
+import models.*
+import util.*
 
 @Serializable
 @SerialName("cone")
-class Cone(private val center: Vector3, private val apex: Vector3, private val radius: Double, private val material: Material) : Hittable {
+class Cone(private val center: Vector3, private val apex: Vector3, private val radius: Double, private val material: Material) : Transformable {
     @Transient
     private val disk = Disk(center, center - apex, radius, material)
     @Transient
@@ -66,16 +66,13 @@ class Cone(private val center: Vector3, private val apex: Vector3, private val r
             return hit
         }
 
+        // check cone
         if(coneT != null && normal != null) {
             val intersection = ray.pointAt(coneT)
             return Hit(intersection, normal, ray, coneT, material)
         }
 
         return null
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        TODO("Not yet implemented")
     }
 
     private fun calculateNormal(point: Vector3): Vector3 {
@@ -91,5 +88,45 @@ class Cone(private val center: Vector3, private val apex: Vector3, private val r
         val d = point dot axis
         val t = (d - (apex dot axis)) / (axis dot axis)
         return apex + t*axis
+    }
+
+    override fun translate(offset: Vector3): Transformable {
+        return Cone(center + offset, apex + offset, radius, material)
+    }
+
+    override fun scale(factor: Double): Transformable {
+        val c = center + (apex - center)/2
+        val scaledCenter = c + (apex - center)*factor
+        val scaledApex = c + (center - apex)*factor
+
+        return Cylinder(scaledCenter, scaledApex, radius * factor, material)
+    }
+
+    override fun rotateX(angle: Double): Transformable {
+        return rotate(Vector3::rotateX, angle)
+    }
+
+    override fun rotateY(angle: Double): Transformable {
+        return rotate(Vector3::rotateY, angle)
+    }
+
+    override fun rotateZ(angle: Double): Transformable {
+        return rotate(Vector3::rotateZ, angle)
+    }
+
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+        // offset to rotate around origin
+        val c = center + (apex - center)/2
+
+        // move disk centers so that cylinder center is at origin, rotate, move back
+        var rotatedCenter = center - c
+        rotatedCenter = rotatedCenter.function(angle)
+        rotatedCenter += c
+
+        var rotatedApex = apex - c
+        rotatedApex = rotatedApex.function(angle)
+        rotatedApex += c
+
+        return Cylinder(rotatedCenter, rotatedApex, radius, material)
     }
 }

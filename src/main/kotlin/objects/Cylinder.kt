@@ -5,10 +5,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
+import models.*
 import util.*
-import kotlin.math.abs
 
 @Serializable
 @SerialName("cylinder")
@@ -83,28 +82,13 @@ class Cylinder(private val center1: Vector3, private val center2: Vector3, priva
             normal = hit2.normal
         }
 
+        // check cylinder
         if(smallestT != null && normal != null) {
             val intersection = ray.pointAt(smallestT)
             return Hit(intersection, normal, ray, smallestT, material)
         }
 
         return null
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        // check top and bottom disk
-        if(disk1.checkPoint(point)) {
-            return true
-        }
-        if(disk2.checkPoint(point)) {
-            return true
-        }
-
-        // check cylinder
-        val closestPoint = getClosestPointOnAxis(point)
-        val distance = (closestPoint - point).length()
-        val difference = distance - radius
-        return abs(difference) < 0.0001
     }
 
     private fun getClosestPointOnAxis(point: Vector3): Vector3 {

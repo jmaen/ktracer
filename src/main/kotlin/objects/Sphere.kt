@@ -7,7 +7,6 @@ import kotlinx.serialization.SerialName
 import materials.Material
 import models.*
 import util.*
-import kotlin.math.abs
 
 @Serializable
 @SerialName("sphere")
@@ -41,12 +40,6 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
         }
 
         return null
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        val distance = (point - center).length()
-        val difference = distance - radius
-        return abs(difference) < 0.0001
     }
 
     override fun translate(offset: Vector3): Transformable {

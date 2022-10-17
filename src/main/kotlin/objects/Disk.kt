@@ -4,14 +4,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
+import models.*
 
 @Serializable
 @SerialName("disk")
 class Disk(private val center: Vector3, private val normal: Vector3, private val radius: Double, private val material: Material) : Transformable {
     @Transient
-    private val plane: Plane = Plane(center, normal, material)
+    private val plane = Plane(center, normal, material)
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
         val hit = plane.hit(ray, tMin, tMax)
@@ -24,10 +24,6 @@ class Disk(private val center: Vector3, private val normal: Vector3, private val
         }
 
         return null
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        return plane.checkPoint(point) && checkCircle(point)
     }
 
     private fun checkCircle(point: Vector3): Boolean {

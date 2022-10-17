@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
+import models.*
 
 @Serializable
 @SerialName("box")
@@ -34,17 +34,6 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         }
 
         return nearestHit
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        // check if point is on one of the boxes faces
-        for(face in faces) {
-            if(face.checkPoint(point)) {
-                return true
-            }
-        }
-
-        return false
     }
 
     private fun calculateFaces(directions: List<Vector3>): List<Polygon> {

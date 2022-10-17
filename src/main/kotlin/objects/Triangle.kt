@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
+import models.*
 
 @Serializable
 @SerialName("triangle")
@@ -32,10 +32,6 @@ class Triangle(private val vertex1: Vector3, private val vertex2: Vector3, priva
         }
 
         return null
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        return plane.checkPoint(point) && checkTriangle(point)
     }
 
     fun checkTriangle(point: Vector3): Boolean {

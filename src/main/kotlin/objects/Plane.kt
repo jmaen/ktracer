@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
+import models.*
 
 @Serializable
 @SerialName("plane")
@@ -38,7 +38,7 @@ class Plane(private val point: Vector3, private val normal: Vector3, private val
         return null
     }
 
-    override fun checkPoint(point: Vector3): Boolean {
+    fun checkPoint(point: Vector3): Boolean {
         val difference = (point dot normal) - d
         return abs(difference) < 0.0001
     }

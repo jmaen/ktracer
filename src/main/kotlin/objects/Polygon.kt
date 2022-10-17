@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Transient
 
-import models.*
 import materials.Material
+import models.*
 
 @Serializable
 @SerialName("polygon")
@@ -46,10 +46,6 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         }
 
         return null
-    }
-
-    override fun checkPoint(point: Vector3): Boolean {
-        return plane.checkPoint(point) && checkPolygon(point)
     }
 
     private fun checkPolygon(point: Vector3): Boolean {

@@ -1,10 +1,10 @@
 package models
 
+import kotlin.math.*
+import kotlin.random.Random
 import kotlinx.serialization.Serializable
 
 import util.*
-import kotlin.math.*
-import kotlin.random.Random
 
 @Serializable
 data class Vector3(val x: Double, val y: Double, val z: Double) {
