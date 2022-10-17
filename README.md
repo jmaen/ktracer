@@ -2,7 +2,7 @@
 **kt**racer is a basic pathtracer written entirely in Kotlin. 
 
 It currently supports:
-- Multiple objects (spheres, cylinders, axis-aligned boxes, planes, disks, triangles and convex polygons)
+- Multiple objects (spheres, cylinders, cones, axis-aligned boxes, planes, disks, triangles and convex polygons)
 - Transforms (translation, rotation and scaling)
 - Multiple materials (diffuse, metal, glass and emissive)
 - Anti-aliasing (SSAA) 
