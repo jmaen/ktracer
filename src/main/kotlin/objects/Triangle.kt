@@ -9,7 +9,11 @@ import models.*
 
 @Serializable
 @SerialName("triangle")
-class Triangle(private val vertex1: Vector3, private val vertex2: Vector3, private val vertex3: Vector3, private val material: Material) : Transformable {
+class Triangle(
+    private val vertex1: Vector3,
+    private val vertex2: Vector3,
+    private val vertex3: Vector3,
+    private val material: Material) : Transformable {
     @Transient
     private val normal = (vertex2 - vertex1) cross (vertex3 - vertex1)
     @Transient

@@ -11,7 +11,11 @@ import util.*
 
 @Serializable
 @SerialName("cone")
-class Cone(private val center: Vector3, private val apex: Vector3, private val radius: Double, private val material: Material) : Transformable {
+class Cone(
+    private val center: Vector3,
+    private val apex: Vector3,
+    private val radius: Double,
+    private val material: Material) : Transformable {
     @Transient
     private val disk = Disk(center, center - apex, radius, material)
     @Transient

@@ -9,7 +9,10 @@ import models.*
 
 @Serializable
 @SerialName("disk")
-class Disk(private val center: Vector3, private val normal: Vector3, private val radius: Double, private val material: Material) : Transformable {
+class Disk(private val center: Vector3,
+           private val normal: Vector3,
+           private val radius: Double,
+           private val material: Material) : Transformable {
     @Transient
     private val plane = Plane(center, normal, material)
 

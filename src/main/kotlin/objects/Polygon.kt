@@ -25,7 +25,7 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         if(p != null) {
             plane = p
         } else {
-            throw IllegalArgumentException("All vertices have to lie on the same plane.")
+            throw IllegalArgumentException("The vertices have to be coplanar.")
         }
 
         if(!isConvexPolygon(vertexList)) {
@@ -33,30 +33,6 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         }
 
         triangles = convertToTriangles(vertexList)
-    }
-
-    override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
-        val hit = plane.hit(ray, tMin, tMax)
-
-        // if plane is hit, check if hit point is inside one of the triangles
-        if(hit != null) {
-            if(checkPolygon(hit.point)) {
-                return hit
-            }
-        }
-
-        return null
-    }
-
-    private fun checkPolygon(point: Vector3): Boolean {
-        // check if point is inside the polygon (i.e. inside one of the triangles)
-        for(triangle in triangles) {
-            if(triangle.checkTriangle(point)) {
-                return true
-            }
-        }
-
-        return false
     }
 
     private fun calculatePlane(vertices: List<Vector3>): Plane? {
@@ -92,6 +68,30 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         }
 
         return triangleList
+    }
+
+    override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
+        val hit = plane.hit(ray, tMin, tMax)
+
+        // if plane is hit, check if hit point is inside one of the triangles
+        if(hit != null) {
+            if(checkPolygon(hit.point)) {
+                return hit
+            }
+        }
+
+        return null
+    }
+
+    private fun checkPolygon(point: Vector3): Boolean {
+        // check if point is inside the polygon (i.e. inside one of the triangles)
+        for(triangle in triangles) {
+            if(triangle.checkTriangle(point)) {
+                return true
+            }
+        }
+
+        return false
     }
 
     override fun translate(offset: Vector3): Transformable {

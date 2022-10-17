@@ -11,9 +11,8 @@ import models.*
 class Transform(
     private var transformable: Transformable,
     private val translate: Vector3? = null,
-    private val rotate: Rotation? = null,
-    private val scale: Double? = null) : Hittable {
-
+    private val scale: Double? = null,
+    private val rotate: Rotation? = null) : Hittable {
     init {
         if(translate != null) {
             transformable = transformable.translate(translate)
@@ -25,10 +24,9 @@ class Transform(
             var (axis, angle) = rotate
             angle *= PI / 180
             transformable = when(axis) {
-                "x" -> transformable.rotateX(angle)
-                "y" -> transformable.rotateY(angle)
-                "z" -> transformable.rotateZ(angle)
-                else -> throw IllegalStateException()
+                Rotation.Axis.X -> transformable.rotateX(angle)
+                Rotation.Axis.Y -> transformable.rotateY(angle)
+                Rotation.Axis.Z -> transformable.rotateZ(angle)
             }
         }
     }

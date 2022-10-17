@@ -11,7 +11,11 @@ import util.*
 
 @Serializable
 @SerialName("cylinder")
-class Cylinder(private val center1: Vector3, private val center2: Vector3, private val radius: Double, private val material: Material) : Transformable {
+class Cylinder(
+    private val center1: Vector3,
+    private val center2: Vector3,
+    private val radius: Double,
+    private val material: Material) : Transformable {
     @Transient
     private val disk1 = Disk(center1, center1 - center2, radius, material)
     @Transient
