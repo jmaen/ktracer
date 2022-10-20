@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
 import models.*
-import util.randomOnSphere
+import util.*
 
 @Serializable
 @SerialName("metal")
@@ -20,7 +20,7 @@ class Metal(private val color: Color, private val roughness: Double = 0.0) : Mat
 
         // fuzzy reflection
         if(roughness != 0.0) {
-            reflected += randomOnSphere(roughness)
+            reflected += randomInSphere(roughness)
         }
 
         return Sample(Ray(hit.point, reflected), color)
