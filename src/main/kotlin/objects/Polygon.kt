@@ -94,7 +94,7 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         return false
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun translate(offset: Vector3): Polygon {
         val vertexList = mutableListOf<Vector3>()
         for(vertex in vertices) {
             vertexList.add(vertex + offset)
@@ -103,7 +103,7 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         return Polygon(*vertexList.toTypedArray(), material = material)
     }
 
-    override fun scale(factor: Double): Transformable {
+    override fun scale(factor: Double): Polygon {
         var center = Vector3.ZERO
         for(vertex in vertices) {
             center += vertex
@@ -118,19 +118,19 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
         return Polygon(*vertexList.toTypedArray(), material = material)
     }
 
-    override fun rotateX(angle: Double): Transformable {
+    override fun rotateX(angle: Double): Polygon {
         return rotate(Vector3::rotateX, angle)
     }
 
-    override fun rotateY(angle: Double): Transformable {
+    override fun rotateY(angle: Double): Polygon {
         return rotate(Vector3::rotateY, angle)
     }
 
-    override fun rotateZ(angle: Double): Transformable {
+    override fun rotateZ(angle: Double): Polygon {
         return rotate(Vector3::rotateZ, angle)
     }
 
-    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Polygon {
         // offset to rotate around origin
         var center = Vector3.ZERO
         for(vertex in vertices) {

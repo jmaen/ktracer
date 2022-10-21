@@ -94,31 +94,31 @@ class Cone(
         return apex + t*axis
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun translate(offset: Vector3): Cone {
         return Cone(center + offset, apex + offset, radius, material)
     }
 
-    override fun scale(factor: Double): Transformable {
+    override fun scale(factor: Double): Cone {
         val c = center + (apex - center)/2
         val scaledCenter = c + (apex - center)*factor
         val scaledApex = c + (center - apex)*factor
 
-        return Cylinder(scaledCenter, scaledApex, radius * factor, material)
+        return Cone(scaledCenter, scaledApex, radius * factor, material)
     }
 
-    override fun rotateX(angle: Double): Transformable {
+    override fun rotateX(angle: Double): Cone {
         return rotate(Vector3::rotateX, angle)
     }
 
-    override fun rotateY(angle: Double): Transformable {
+    override fun rotateY(angle: Double): Cone {
         return rotate(Vector3::rotateY, angle)
     }
 
-    override fun rotateZ(angle: Double): Transformable {
+    override fun rotateZ(angle: Double): Cone {
         return rotate(Vector3::rotateZ, angle)
     }
 
-    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Cone {
         // offset to rotate around origin
         val c = center + (apex - center)/2
 
@@ -131,6 +131,6 @@ class Cone(
         rotatedApex = rotatedApex.function(angle)
         rotatedApex += c
 
-        return Cylinder(rotatedCenter, rotatedApex, radius, material)
+        return Cone(rotatedCenter, rotatedApex, radius, material)
     }
 }

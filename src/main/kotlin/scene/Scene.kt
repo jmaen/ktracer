@@ -18,10 +18,10 @@ import util.*
 @Serializable
 class Scene(
     private val camera: Camera,
-    private val objects: List<Hittable>,
+    private val objects: MutableList<Hittable>,
     private val samples: Int,
-    private val ssaaFactor: Int,
-    private val maxBounces: Int,
+    private val ssaaFactor: Int = 1,
+    private val maxBounces: Int = 10,
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0) {
     @Transient
@@ -39,6 +39,10 @@ class Scene(
         if(ssaaFactor < 1) {
             throw IllegalArgumentException("Supersampling factor has to be >= 1.")
         }
+    }
+
+    fun addObjects(o: List<Hittable>) {
+        objects.addAll(o)
     }
 
     suspend fun render(threads: Int = Runtime.getRuntime().availableProcessors()): Image {

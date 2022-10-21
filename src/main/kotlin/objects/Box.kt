@@ -23,19 +23,6 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         faces = calculateFaces(directions)
     }
 
-    override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
-        // find the nearest face hit, if any
-        var nearestHit: Hit? = null
-        for(face in faces) {
-            val hit = face.hit(ray, tMin, tMax)
-            if(nearestHit == null || (hit != null && hit.t < nearestHit.t)) {
-                nearestHit = hit
-            }
-        }
-
-        return nearestHit
-    }
-
     private fun calculateFaces(directions: List<Vector3>): List<Polygon> {
         val polygonList = mutableListOf<Polygon>()
         val vertexList = mutableListOf<Vector3>()
@@ -73,11 +60,24 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         return polygonList
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
+        // find the nearest face hit, if any
+        var nearestHit: Hit? = null
+        for(face in faces) {
+            val hit = face.hit(ray, tMin, tMax)
+            if(nearestHit == null || (hit != null && hit.t < nearestHit.t)) {
+                nearestHit = hit
+            }
+        }
+
+        return nearestHit
+    }
+
+    override fun translate(offset: Vector3): Box {
         return Box(corner1 + offset, corner2 + offset, material)
     }
 
-    override fun scale(factor: Double): Transformable {
+    override fun scale(factor: Double): Box {
         val center = corner1 + (corner2 - corner1)/2
         val scaledCorner1 = center + (corner1 - center)*factor
         val scaledCorner2 = center + (corner2 - center)*factor
@@ -85,24 +85,24 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
         return Box(scaledCorner1, scaledCorner2, material)
     }
 
-    override fun rotateX(angle: Double): Transformable {
+    override fun rotateX(angle: Double): Box {
         return rotate(Vector3::rotateX, angle)
     }
 
-    override fun rotateY(angle: Double): Transformable {
+    override fun rotateY(angle: Double): Box {
         return rotate(Vector3::rotateY, angle)
     }
 
-    override fun rotateZ(angle: Double): Transformable {
+    override fun rotateZ(angle: Double): Box {
         return rotate(Vector3::rotateZ, angle)
     }
 
-    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Box {
         // offset to rotate around origin
         val center = corner1 + (corner2 - corner1) / 2
 
         // rotate all vertices, create new corresponding polygons
-        val polygonList = mutableListOf<Polygon>()
+        val faceList = mutableListOf<Polygon>()
         val vertexList = mutableListOf<Vector3>()
         for(face in faces) {
             for(vertex in face.vertices) {
@@ -113,10 +113,10 @@ class Box(private val corner1: Vector3, private val corner2: Vector3, private va
 
                 vertexList.add(currentVertex)
             }
-            polygonList.add(Polygon(*vertexList.toTypedArray(), material = material))
+            faceList.add(Polygon(*vertexList.toTypedArray(), material = material))
             vertexList.clear()
         }
-        faces = polygonList
+        faces = faceList
 
         return this
     }

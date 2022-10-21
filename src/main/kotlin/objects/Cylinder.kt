@@ -100,11 +100,11 @@ class Cylinder(
         return center1 + ((point - center1) dot n)*n
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun translate(offset: Vector3): Cylinder {
         return Cylinder(center1 + offset, center2 + offset, radius, material)
     }
 
-    override fun scale(factor: Double): Transformable {
+    override fun scale(factor: Double): Cylinder {
         val center = center1 + (center2 - center1)/2
         val scaledCenter1 = center + (center1 - center)*factor
         val scaledCenter2 = center + (center2 - center)*factor
@@ -112,19 +112,19 @@ class Cylinder(
         return Cylinder(scaledCenter1, scaledCenter2, radius * factor, material)
     }
 
-    override fun rotateX(angle: Double): Transformable {
+    override fun rotateX(angle: Double): Cylinder {
         return rotate(Vector3::rotateX, angle)
     }
 
-    override fun rotateY(angle: Double): Transformable {
+    override fun rotateY(angle: Double): Cylinder {
         return rotate(Vector3::rotateY, angle)
     }
 
-    override fun rotateZ(angle: Double): Transformable {
+    override fun rotateZ(angle: Double): Cylinder {
         return rotate(Vector3::rotateZ, angle)
     }
 
-    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Cylinder {
         // offset to rotate around origin
         val center = center1 + (center2 - center1)/2
 

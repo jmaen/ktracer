@@ -42,17 +42,17 @@ class Sphere(private val center: Vector3, private val radius: Double, private va
         return null
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun translate(offset: Vector3): Sphere {
         return Sphere(center + offset, radius, material)
     }
 
-    override fun scale(factor: Double): Transformable {
+    override fun scale(factor: Double): Sphere {
         return Sphere(center, radius * factor, material)
     }
 
-    override fun rotateX(angle: Double): Transformable = this
+    override fun rotateX(angle: Double): Sphere = this
 
-    override fun rotateY(angle: Double): Transformable = this
+    override fun rotateY(angle: Double): Sphere = this
 
-    override fun rotateZ(angle: Double): Transformable = this
+    override fun rotateZ(angle: Double): Sphere = this
 }

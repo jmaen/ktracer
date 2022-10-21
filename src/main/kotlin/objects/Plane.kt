@@ -43,21 +43,21 @@ class Plane(private val point: Vector3, private val normal: Vector3, private val
         return abs(difference) < 0.0001
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun translate(offset: Vector3): Plane {
         return Plane(point + offset, normal, material)
     }
 
-    override fun scale(factor: Double): Transformable = this
+    override fun scale(factor: Double): Plane = this
 
-    override fun rotateX(angle: Double): Transformable {
+    override fun rotateX(angle: Double): Plane {
         return Plane(point, normal.rotateX(angle), material)
     }
 
-    override fun rotateY(angle: Double): Transformable {
+    override fun rotateY(angle: Double): Plane {
         return Plane(point, normal.rotateY(angle), material)
     }
 
-    override fun rotateZ(angle: Double): Transformable {
+    override fun rotateZ(angle: Double): Plane {
         return Plane(point, normal.rotateZ(angle), material)
     }
 }

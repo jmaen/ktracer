@@ -52,11 +52,11 @@ class Triangle(
         return false
     }
 
-    override fun translate(offset: Vector3): Transformable {
+    override fun translate(offset: Vector3): Triangle {
         return Triangle(vertex1 + offset, vertex2 + offset, vertex3 + offset, material)
     }
 
-    override fun scale(factor: Double): Transformable {
+    override fun scale(factor: Double): Triangle {
         val center = (vertex1 + vertex2 + vertex3) / 3
         val scaledVertex1 = center + (vertex1 - center)*factor
         val scaledVertex2 = center + (vertex2 - center)*factor
@@ -65,19 +65,19 @@ class Triangle(
         return Triangle(scaledVertex1, scaledVertex2, scaledVertex3, material)
     }
 
-    override fun rotateX(angle: Double): Transformable {
+    override fun rotateX(angle: Double): Triangle {
         return rotate(Vector3::rotateX, angle)
     }
 
-    override fun rotateY(angle: Double): Transformable {
+    override fun rotateY(angle: Double): Triangle {
         return rotate(Vector3::rotateY, angle)
     }
 
-    override fun rotateZ(angle: Double): Transformable {
+    override fun rotateZ(angle: Double): Triangle {
         return rotate(Vector3::rotateZ, angle)
     }
 
-    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Transformable {
+    private fun rotate(function: Vector3.(Double) -> Vector3, angle: Double): Triangle {
         // offset to rotate around origin
         val center = (vertex1 + vertex2 + vertex3) / 3
 
