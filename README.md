@@ -3,6 +3,7 @@
 
 It currently supports:
 - Multiple objects (spheres, cylinders, cones, axis-aligned boxes, planes, disks, triangles and convex polygons)
+- Polygon meshes (.obj format)
 - Transforms (translation, rotation and scaling)
 - Multiple materials (diffuse, metal, glass and emissive)
 - Anti-aliasing (SSAA) 
