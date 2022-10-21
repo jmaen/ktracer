@@ -2,6 +2,7 @@ package models
 
 import kotlin.math.pow
 import kotlin.math.round
+import kotlin.random.Random
 import kotlinx.serialization.Serializable
 
 import util.*
@@ -68,6 +69,10 @@ data class Color(var red: Double, var green: Double, var blue: Double) {
     companion object {
         val BLACK = Color(0.0, 0.0, 0.0)
         val WHITE = Color(1.0, 1.0, 1.0)
+
+        fun random(): Color {
+            return Color(Random.nextDouble(0.0, 1.0), Random.nextDouble(0.0, 1.0), Random.nextDouble(0.0, 1.0))
+        }
 
         fun fromRGB(rgb: Int): Color {
             val mask = 0xFF

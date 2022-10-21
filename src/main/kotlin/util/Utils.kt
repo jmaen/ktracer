@@ -19,11 +19,11 @@ fun randomInXYDisk(radius: Double): Vector3 {
 
 fun randomInSphere(radius: Double): Vector3 {
     while(true) {
-        val random = Vector3.random(-radius, radius)
+        val random = Vector3.random(-1.0, 1.0)
         if(random.length() > 1) {
             continue
         }
-        return random
+        return radius * random
     }
 }
 
