@@ -20,10 +20,10 @@ It currently supports:
 
 ## About
 ### Why this project?
-I always thought computer graphics was a really interesting field and wanted to learn more about it. I also happened to be in search of a new programming project, so my own path tracer seemed like a perfect fit. Keep in mind that this is my first computer graphics project, so the project is not so much about maximum performance, but more about developing a general understanding of how things work, and exploring the various techniques involved.
+I always thought computer graphics was a really interesting field and wanted to learn more about it. I also happened to be in search of a new programming project, so my own path tracer seemed like a perfect fit. Keep in mind that this project is not so much about maximum performance, but more about developing a general understanding of how things work, and exploring the various techniques involved.
 
 ### Why Kotlin?
-First of all, perhaps the better question would be “Why not C++?”. The answer is simple: most similar projects are written in C++, and I wanted to try something new. As I explained above, performance wasn’t really an issue either, so I decided to go with a different language. As for why I chose Kotlin specifically, I've been wanting to try it for quite a while now and simply decided to finally do so in this project.
+First of all, perhaps the better question would be “Why not C++?”, considering how widely used it is in computer graphics. As I explained above, performance wasn't really the main focus for this project, so I decided to go with a different language. Since I've wanted to try Kotlin for quite a while, I simply decided to finally do so in this project.
 
 ### Sources
 Sources that helped or inspired me in the development of this project include:
