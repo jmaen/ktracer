@@ -18,6 +18,18 @@ It currently supports:
   (1000x1000, 2000 samples, 2x supersampling, 10 max bounces)
 </p>
 
+## Usage
+```
+Usage: ktracer scene [-o output] [-t threads] [-g gamma]
+Arguments:
+    scene -> Scene file path { String }
+Options:
+    --output, -o -> Output file path { String }
+    --threads, -t -> Amount of threads the program should run in { Int }
+    --gamma, -g -> Value used for gamma correcting the image { Double }
+    --help, -h -> Usage info
+```
+
 ## About
 ### Why this project?
 I always thought computer graphics was a really interesting field and wanted to learn more about it. I also happened to be in search of a new programming project, so my own path tracer seemed like a perfect fit. Keep in mind that this project is not so much about maximum performance, but more about developing a general understanding of how things work, and exploring the various techniques involved.
