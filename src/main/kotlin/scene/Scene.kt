@@ -195,18 +195,18 @@ class Scene(
             val c = if(percentage >= i * 5) '=' else ' '
             print(c)
         }
-        print("] (${round(percentage * 100) / 100}%)\r")
+        print("] (${percentage.roundTo(2)}%)\r")
     }
 
-    fun save(path: String) {
+    fun save(file: File) {
         val format = Json { prettyPrint = true }
         val json = format.encodeToString(this)
-        File(path).writeText(json)
+        file.writeText(json)
     }
 
     companion object {
-        fun load(path: String): Scene {
-            val json = File(path).readText()
+        fun load(file: File): Scene {
+            val json = file.readText()
             return Json.decodeFromString(json)
         }
     }

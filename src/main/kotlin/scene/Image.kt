@@ -21,7 +21,7 @@ class Image(
         }
     }
 
-    fun save(path: String) {
+    fun save(file: File) {
         // set image data
         val buffer = BufferedImage(image.size, image[0].size, BufferedImage.TYPE_INT_RGB)
         for(i in 0 until buffer.width) {
@@ -51,7 +51,6 @@ class Image(
         val img = IIOImage(buffer, null, metadata)
 
         // write image
-        val file = File(path)
         val outputStream = FileImageOutputStream(file)
         writer.output = outputStream
         writer.write(img)

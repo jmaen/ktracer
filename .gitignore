@@ -2,6 +2,6 @@
 /build
 /.idea
 /bin
-/src/main/kotlin/Main.kt
+/src/main/kotlin/Test.kt
 /src/main/resources/*
 /TODO.md

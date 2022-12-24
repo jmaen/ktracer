@@ -1,3 +1,1 @@
-
-rootProject.name = "ktracing"
-
+rootProject.name = "ktracer"

@@ -3,6 +3,7 @@ package util
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.round
 
 import models.Vector3
 import models.Color
@@ -33,4 +34,10 @@ fun Int.pow(x: Double): Double {
 
 fun Double.clamp(lower: Double, upper: Double): Double {
     return min(upper, max(lower, this))
+}
+
+fun Double.roundTo(decimals: Int): Double {
+    var multiplier = 1.0
+    repeat(decimals) { multiplier *= 10 }
+    return round(this * multiplier) / multiplier
 }
