@@ -5,7 +5,6 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.fixedRateTimer
-import kotlin.math.*
 import kotlin.system.measureTimeMillis
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
@@ -14,6 +13,7 @@ import kotlinx.coroutines.*
 import models.*
 import objects.*
 import util.*
+import kotlin.math.round
 
 @Serializable
 class Scene(
@@ -25,7 +25,13 @@ class Scene(
     private val voidColor: Color = Color.BLACK,
     private val renderDistance: Double = 100.0) {
     @Transient
-    private val renderedColumns = AtomicInteger(0)
+    private var imageWidth = 0
+    @Transient
+    private var imageHeight = 0
+    @Transient
+    private var startTime: Long = 0
+    @Transient
+    private val renderedPixels = AtomicInteger(0)
     @Transient
     private var print = false
 
@@ -47,8 +53,8 @@ class Scene(
 
     suspend fun render(threads: Int = Runtime.getRuntime().availableProcessors()): Image {
         // compute image dimensions, initialize image array
-        val imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
-        val imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
+        imageWidth = (camera.canvasWidth * camera.pixelsPerUnit).toInt()
+        imageHeight = (camera.canvasHeight * camera.pixelsPerUnit).toInt()
         val image: Array<Array<Color>> = Array(imageWidth) { Array(imageHeight) { Color.BLACK } }
 
         // store render parameters for image metadata
@@ -58,37 +64,36 @@ class Scene(
             "maxBounces" to maxBounces.toString())
 
         // status bar timer
-        fixedRateTimer(daemon = true, period = 500) {
+        fixedRateTimer(daemon = true, period = 1000) {
             print = true
         }
 
         coroutineScope {
-            val millis = measureTimeMillis {
-                // render parts asynchronously
-                val partList = mutableListOf<Deferred<Array<Array<Color>>>>()
-                val partSize = imageWidth / threads
-                for(i in 0 until threads - 1) {
-                    partList.add(async { renderPart(i * partSize, (i + 1) * partSize, imageWidth, imageHeight) })
-                }
-                partList.add(async { renderPart((threads - 1) * partSize, imageWidth, imageWidth, imageHeight) })
+            startTime = System.currentTimeMillis()
 
-                // wait for all parts, copy parts into final image
-                val parts = awaitAll(*partList.toTypedArray()).toTypedArray()
-                for(i in 0 until threads) {
-                    parts[i].copyInto(image, i * partSize)
-                }
+            // render parts asynchronously
+            val partList = mutableListOf<Deferred<Array<Array<Color>>>>()
+            val partSize = imageWidth / threads
+            for(i in 0 until threads - 1) {
+                partList.add(async {
+                    renderPart(i * partSize, (i + 1) * partSize)
+                })
+            }
+            partList.add(async {
+                renderPart((threads - 1) * partSize, imageWidth)
+            })
+
+            // wait for all parts, copy parts into final image
+            val parts = partList.awaitAll().toTypedArray()
+            for(i in 0 until threads) {
+                parts[i].copyInto(image, i * partSize)
             }
 
             // print summary
             val rays = String.format(Locale.US, "%,d", Ray.instanceCount.toLong())
             summary["rays"] = rays
-
-            val hours = TimeUnit.MILLISECONDS.toHours(millis)
-            val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(hours)
-            val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(minutes)
-            val renderTime = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-            summary["renderTime"] = renderTime
-
+            val renderTime = System.currentTimeMillis() - startTime
+            summary["renderTime"] = toTimeString(renderTime)
             println("Rendering: [====================] (100%)")
             println("Finished rendering! Spawned $rays rays in $renderTime.")
         }
@@ -96,20 +101,25 @@ class Scene(
         return Image(image, summary)
     }
 
-    private fun renderPart(from: Int, to: Int, imageWidth: Int, imageHeight: Int): Array<Array<Color>> {
+    private fun renderPart(from: Int, to: Int): Array<Array<Color>> {
+        val pixelCount = imageHeight * imageWidth
+
         // initialize array
         val part = Array(to - from) { Array(imageHeight) { Color.BLACK } }
 
         // render part
         for(x in from until to) {
-            // status bar
-            val count = renderedColumns.incrementAndGet()
-            if(print) {
-                print = false
-                printStatusBar(count.toDouble() / imageWidth * 100)
-            }
-
             for(y in 0 until imageHeight) {
+                // progress bar
+                val renderedCount = renderedPixels.incrementAndGet()
+                if(print) {
+                    print = false
+                    val renderedPortion = renderedCount.toDouble() / pixelCount
+                    val elapsedTime = System.currentTimeMillis() - startTime
+                    val estimatedTime = (1/renderedPortion)*elapsedTime - elapsedTime
+                    printProgressBar(renderedPortion * 100, estimatedTime.toLong())
+                }
+
                 var color = Color.BLACK
                 for(i in 0 until ssaaFactor) {
                     for(j in 0 until ssaaFactor) {
@@ -189,13 +199,21 @@ class Scene(
         return nearestHit
     }
 
-    private fun printStatusBar(percentage: Double) {
+    private fun toTimeString(millis: Long): String {
+        val hours = TimeUnit.MILLISECONDS.toHours(millis)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    private fun printProgressBar(percentage: Double, timeLeft: Long) {
         print("Rendering: [")
         for(i in 1..20) {
             val c = if(percentage >= i * 5) '=' else ' '
             print(c)
         }
-        print("] (${percentage.roundTo(2)}%)\r")
+        print("] (${percentage.roundTo(2)}% done, approx. ${toTimeString(timeLeft)} remaining)\r")
     }
 
     fun save(file: File) {
