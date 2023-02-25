@@ -10,7 +10,7 @@ import models.*
 
 @Serializable
 @SerialName("plane")
-class Plane(private val point: Vector3, private val normal: Vector3, private val material: Material) : Transformable {
+class Plane(private val point: Vector3, val normal: Vector3, private val material: Material) : Transformable {
     @Transient
     private val d = point dot normal
 

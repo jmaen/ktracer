@@ -6,6 +6,8 @@ import kotlinx.serialization.Transient
 
 import materials.Material
 import models.*
+import kotlin.math.PI
+import kotlin.math.abs
 
 @Serializable
 @SerialName("polygon")
@@ -47,8 +49,34 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
     }
 
     private fun isConvexPolygon(vertices: List<Vector3>): Boolean {
-        // TODO
-        return true
+        var orientation = 0
+        var sum = 0.0
+        for(i in vertices.indices) {
+            val a = vertices[(i - 1).mod(vertices.size)]
+            val b = vertices[i]
+            val c = vertices[(i + 1).mod(vertices.size)]
+
+            // check if C lies right or left of AB in the plane
+            val ab = b - a
+            val ac = c - a
+            val mp = (ab cross ac) dot plane.normal
+            if(orientation == 0) {
+                orientation = if(mp < 0) { -1 } else if(mp > 0) { 1 } else { 0 }
+            } else {
+                // for convex polygons the orientation doesn't change
+                if((orientation < 0 && mp > 0) || (orientation > 0 && mp < 0)) {
+                    return false
+                }
+            }
+
+            // calculate PI - angle at each point
+            val ba = a - b
+            val bc = c - b
+            val angle = ba angle bc
+            sum += PI - angle
+        }
+        // for convex polygons the sum of all (PI - angle) values is 2*PI
+        return abs(sum - 2*PI) < 0.0001
     }
 
     private fun convertToTriangles(vertices: List<Vector3>): List<Triangle> {

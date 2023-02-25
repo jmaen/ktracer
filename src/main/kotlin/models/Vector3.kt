@@ -63,6 +63,12 @@ data class Vector3(val x: Double, val y: Double, val z: Double) {
         return this / length()
     }
 
+    infix fun angle(other: Vector3): Double {
+        val dot = this dot other
+        val lengths = this.length() * other.length()
+        return acos(dot / lengths)
+    }
+
     fun enters(normal: Vector3): Boolean {
         return this dot normal < 0
     }
