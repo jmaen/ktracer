@@ -36,15 +36,9 @@ class Scene(
     private var print = false
 
     init {
-        if(samples < 1) {
-            throw IllegalArgumentException("There has to be at least one sample per ray.")
-        }
-        if(maxBounces < 1) {
-            throw IllegalArgumentException("There has to be at least one bounce.")
-        }
-        if(ssaaFactor < 1) {
-            throw IllegalArgumentException("Supersampling factor has to be >= 1.")
-        }
+        require(samples >= 1) { "There has to be at least one sample per ray." }
+        require(maxBounces >= 1) { "There has to be at least one bounce." }
+        require(ssaaFactor >= 1) { "Supersampling factor has to be >= 1." }
     }
 
     fun addObjects(o: List<Hittable>) {
@@ -138,7 +132,7 @@ class Scene(
 
                         // calculate shading
                         var sampleColor = Color.BLACK
-                        for(n in 0 until samples) {
+                        repeat(samples) {
                             // calculate random point on aperture disk
                             val origin = camera.point + randomInXYDisk(camera.aperture / 2)
 

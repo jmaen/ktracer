@@ -10,9 +10,7 @@ import util.*
 @Serializable
 data class Color(var red: Double, var green: Double, var blue: Double) {
     init {
-        if(red < 0 || green < 0 || blue < 0) {
-            throw IllegalArgumentException("All color components have to be >= 0.")
-        }
+        require(red >= 0 && green >= 0 && blue >= 0) { "All color components have to be >= 0." }
     }
 
     constructor(r: Int, g: Int, b: Int) : this(r / 255.0, g / 255.0, b / 255.0)

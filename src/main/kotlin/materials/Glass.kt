@@ -13,11 +13,9 @@ import kotlin.math.sqrt
 
 @Serializable
 @SerialName("glass")
-class Glass(private val color: Color, private val roughness: Double = 0.0, private val IOR: Double = 1.4) : Material() {
+class Glass(private val color: Color, private val roughness: Double = 0.0, private val ior: Double = 1.4) : Material() {
     init {
-        if(roughness < 0 || roughness > 1) {
-            throw IllegalArgumentException("Roughness has to be in [0, 1].")
-        }
+        require(roughness in 0.0..1.0) { "Roughness has to be in [0, 1]." }
     }
 
     override fun bsdf(hit: Hit): Sample {
@@ -27,9 +25,9 @@ class Glass(private val color: Color, private val roughness: Double = 0.0, priva
         // check if the ray enters or exits the object, adjust refraction ratio and normal direction accordingly
         val refractionRatio: Double
         if(direction.enters(normal)) {
-            refractionRatio = 1 / IOR
+            refractionRatio = 1 / ior
         } else {
-            refractionRatio = IOR
+            refractionRatio = ior
             normal *= -1
         }
 

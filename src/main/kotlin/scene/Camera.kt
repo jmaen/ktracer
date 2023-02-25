@@ -15,14 +15,8 @@ data class Camera(
     val aperture: Double
     ) {
     init {
-        if(point.z <= 0) {
-            throw IllegalArgumentException("Camera's z value has to be > 0.")
-        }
-        if(canvasOrigin.z != 0.0) {
-            throw IllegalArgumentException("Canvas' z value has to be 0.")
-        }
-        if(pixelsPerUnit < 1) {
-            throw IllegalArgumentException("There has to be at least one pixel per unit.")
-        }
+        require(point.z > 0) { "Camera's z value has to be > 0." }
+        require(canvasOrigin.z == 0.0) { "Canvas' z value has to be 0." }
+        require(pixelsPerUnit >= 1) { "There has to be at least one pixel per unit." }
     }
 }

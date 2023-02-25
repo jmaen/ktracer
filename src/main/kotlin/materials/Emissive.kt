@@ -9,9 +9,7 @@ import models.*
 @SerialName("emissive")
 class Emissive(private val color: Color, private val intensity: Double) : Material() {
     init {
-        if(intensity < 0) {
-            throw IllegalArgumentException("Intensity has to be >= 0.")
-        }
+        require(intensity >= 0) { "Intensity has to be >= 0." }
     }
 
     override fun bsdf(hit: Hit): Sample? = null

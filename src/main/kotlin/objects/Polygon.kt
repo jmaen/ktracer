@@ -17,20 +17,13 @@ class Polygon(vararg val vertices: Vector3, private val material: Material) : Tr
 
     init {
         val vertexList = vertices.asList()
-        if(vertexList.size < 3) {
-            throw IllegalArgumentException("There have to be at least 3 vertices.")
-        }
+        require(vertexList.size >= 3) { "There have to be at least 3 vertices." }
 
         val p = calculatePlane(vertexList)
-        if(p != null) {
-            plane = p
-        } else {
-            throw IllegalArgumentException("The vertices have to be coplanar.")
-        }
+        requireNotNull(p) { "The vertices have to be coplanar." }
+        plane = p
 
-        if(!isConvexPolygon(vertexList)) {
-            throw IllegalArgumentException("The vertices have to form a convex polygon.")
-        }
+        require(isConvexPolygon(vertexList)) { "The vertices have to form a convex polygon." }
 
         triangles = convertToTriangles(vertexList)
     }

@@ -1,8 +1,6 @@
 import java.io.File
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
-import kotlinx.cli.default
-import kotlinx.cli.optional
 
 import scene.Scene
 import util.roundTo

@@ -10,9 +10,7 @@ import util.*
 @SerialName("metal")
 class Metal(private val color: Color, private val roughness: Double = 0.0) : Material() {
     init {
-        if(roughness < 0 || roughness > 1) {
-            throw IllegalArgumentException("Roughness has to be in [0, 1].")
-        }
+        require(roughness in 0.0..1.0) { "Roughness has to be in [0, 1]." }
     }
 
     override fun bsdf(hit: Hit): Sample {

@@ -10,9 +10,7 @@ import models.*
 
 @Serializable
 @SerialName("mesh")
-class PolygonMesh(private val source: String,
-                  private val format: Format,
-                  private val material: Material) : Transformable {
+class PolygonMesh(private val source: String, private val material: Material) : Transformable {
     @Transient
     private lateinit var faces: List<Polygon>
     @Transient
@@ -21,11 +19,7 @@ class PolygonMesh(private val source: String,
     private lateinit var max: Vector3
 
     init {
-        faces = when(format) {
-            Format.OBJ -> parseOBJ()
-            Format.OFF -> parseOFF()
-            Format.PLY -> parsePLY()
-        }
+        faces = parseOBJ()
 
         max = calculateMaxBound()
         min = calculateMinBound()
@@ -49,14 +43,6 @@ class PolygonMesh(private val source: String,
         }
 
         return faceList
-    }
-
-    private fun parseOFF(): List<Polygon> {
-        TODO("Not yet implemented")
-    }
-
-    private fun parsePLY(): List<Polygon> {
-        TODO("Not yet implemented")
     }
 
     override fun hit(ray: Ray, tMin: Double, tMax: Double): Hit? {
@@ -167,12 +153,5 @@ class PolygonMesh(private val source: String,
             }
         }
         return Vector3(x, y, z)
-    }
-
-    @Serializable
-    enum class Format {
-        @SerialName("obj") OBJ,
-        @SerialName("off") OFF,
-        @SerialName("ply") PLY
     }
 }

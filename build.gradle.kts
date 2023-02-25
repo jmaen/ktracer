@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.7.0"
     kotlin("plugin.serialization") version "1.7.0"
+    id("io.gitlab.arturbosch.detekt") version "1.22.0"
 }
 
 group = "me.jmaen"
@@ -36,4 +37,11 @@ tasks.jar {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config = files("$projectDir/config/detekt.yml")
+//    baseline = file("$projectDir/config/baseline.xml")
 }
